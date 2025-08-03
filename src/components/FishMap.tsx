@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 
 interface FishMapProps {
   data: FishSample[];
-  selectedSpecies: string | null;
+  selectedSpecies: string[];
 }
 
 const getMarkerColor = (mercuryPpm: number): string => {
@@ -47,7 +47,7 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies }) => {
     <Paper sx={{ p: { xs: 1, sm: 2 } }}>
       <Typography variant="h6" gutterBottom>
         Sample Locations
-        {selectedSpecies && ` - ${selectedSpecies}`}
+        {selectedSpecies.length > 0 && ` - ${selectedSpecies.join(', ')}`}
       </Typography>
       
       <Box sx={{ height: 400, width: '100%' }}>

@@ -67,10 +67,10 @@ export const FishToxMain: React.FC = () => {
               </Grid>
             </Box>
             
-            {selectedSpecies ? (
+            {selectedSpecies.length > 0 ? (
               <>
                 <Typography variant="body1" gutterBottom>
-                  Showing {filteredData.length} samples of {selectedSpecies}
+                  Showing {filteredData.length} samples of {selectedSpecies.join(', ')}
                 </Typography>
                 
                 <Grid container spacing={3} sx={{ my: 1 }}>
@@ -90,7 +90,7 @@ export const FishToxMain: React.FC = () => {
               </>
             ) : (
               <Typography variant="body1" color="text.secondary" sx={{ my: 3 }}>
-                Select a fish species to view mercury data and visualizations
+                Select one or more fish species to view mercury data and visualizations
               </Typography>
             )}
           </>

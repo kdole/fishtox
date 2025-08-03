@@ -3,27 +3,20 @@
 ## High Priority
 
 ### UI/UX Improvements
-- [ ] Allow selecting multiple species
 - [ ] Decide how to color code or otherwise visualize multiple species on both the scatterplot and the map, while still giving information about mercury levels
 - [ ] Add background colors to scatterplot for consumption thresholds
 - [ ] Zooming map should filter points
-- [ ] Would be nice to highlight point on map when hovered on plot
-- [ ] Add favicon for better browser tab identification
+- [ ] Add disclaimer and link to authoritative reference
+- [ ] Add license
 
 ### Data Visualization
 - [ ] Add regression lines to scatter plot
 
-
-## Medium Priority
-
-### Features
-- [ ] Add fish consumption guidelines/recommendations
-
-### Performance
-
 ## Low Priority
 
 ### Enhancement Ideas
+- [ ] Would be nice to highlight point on map when hovered on plot
+- [ ] Add favicon for better browser tab identification
 - [ ] Implement dark mode toggle
 - [ ] Add fish images for common species
 - [ ] Offline mode with service worker

@@ -4,13 +4,13 @@ import { useSearchParams } from 'react-router-dom';
 export const useUrlState = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const selectedSpecies = searchParams.get('species');
+  const selectedSpecies = searchParams.get('species')?.split(',').filter(Boolean) || [];
 
-  const setSelectedSpecies = useCallback((species: string | null) => {
+  const setSelectedSpecies = useCallback((species: string[]) => {
     const newParams = new URLSearchParams(searchParams);
     
-    if (species) {
-      newParams.set('species', species);
+    if (species.length > 0) {
+      newParams.set('species', species.join(','));
     } else {
       newParams.delete('species');
     }

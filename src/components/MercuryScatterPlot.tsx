@@ -6,7 +6,7 @@ import { mmToInches } from '../utils/csvParser';
 
 interface MercuryScatterPlotProps {
   data: FishSample[];
-  selectedSpecies: string | null;
+  selectedSpecies: string[];
 }
 
 interface PlotData {
@@ -68,7 +68,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     <Paper sx={{ p: { xs: 1, sm: 2 } }}>
       <Typography variant="h6" gutterBottom>
         Mercury vs Fish Length
-        {selectedSpecies && ` - ${selectedSpecies}`}
+        {selectedSpecies.length > 0 && ` - ${selectedSpecies.join(', ')}`}
       </Typography>
       
       <Box sx={{ width: '100%', height: { xs: 350, sm: 400 } }}>

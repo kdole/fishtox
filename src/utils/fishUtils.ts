@@ -5,7 +5,7 @@ export const getUniqueSpecies = (fishData: FishSample[]): string[] => {
   return Array.from(speciesSet).sort();
 };
 
-export const filterBySpecies = (fishData: FishSample[], species: string | null): FishSample[] => {
-  if (!species) return fishData;
-  return fishData.filter(fish => fish.species === species);
+export const filterBySpecies = (fishData: FishSample[], species: string[]): FishSample[] => {
+  if (!species || species.length === 0) return [];
+  return fishData.filter(fish => species.includes(fish.species));
 };

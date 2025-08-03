@@ -3,8 +3,8 @@ import { Autocomplete, TextField } from '@mui/material';
 
 interface SpeciesPickerProps {
   species: string[];
-  selectedSpecies: string | null;
-  onSpeciesChange: (species: string | null) => void;
+  selectedSpecies: string[];
+  onSpeciesChange: (species: string[]) => void;
 }
 
 export const SpeciesPicker: React.FC<SpeciesPickerProps> = ({
@@ -14,6 +14,7 @@ export const SpeciesPicker: React.FC<SpeciesPickerProps> = ({
 }) => {
   return (
     <Autocomplete
+      multiple
       value={selectedSpecies}
       onChange={(_, newValue) => onSpeciesChange(newValue)}
       options={species}
@@ -34,7 +35,10 @@ export const SpeciesPicker: React.FC<SpeciesPickerProps> = ({
       }}
       openOnFocus
       clearOnBlur={false}
-      blurOnSelect
+      ChipProps={{
+        size: 'small',
+        sx: { fontSize: '0.875rem' }
+      }}
     />
   );
 };
