@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps } from 'recharts';
-import { Paper, Typography, Box } from '@mui/material';
+import { Paper, Typography, Box, Chip } from '@mui/material';
 import { FishSample } from '../types/fish';
 import { mmToInches } from '../utils/csvParser';
 
@@ -15,6 +15,24 @@ interface PlotData {
   species: string;
   originalData: FishSample;
 }
+
+const SPECIES_COLORS = [
+  '#1976d2', // Blue
+  '#d32f2f', // Red
+  '#388e3c', // Green
+  '#f57c00', // Orange
+  '#7b1fa2', // Purple
+  '#0288d1', // Light Blue
+  '#c2185b', // Pink
+  '#5d4037', // Brown
+  '#455a64', // Blue Grey
+  '#e64a19', // Deep Orange
+];
+
+const getSpeciesColor = (species: string, allSpecies: string[]): string => {
+  const index = allSpecies.indexOf(species);
+  return SPECIES_COLORS[index % SPECIES_COLORS.length];
+};
 
 const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
   if (active && payload && payload.length > 0) {
@@ -31,14 +49,29 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload
 };
 
 export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, selectedSpecies }) => {
-  const allPlotData = useMemo(() => {
-    return data.map(fish => ({
-      lengthInches: mmToInches(fish.lengthMm),
-      mercuryPpm: fish.mercuryPpm,
-      species: fish.species,
-      originalData: fish,
-    }));
+  const plotDataBySpecies = useMemo(() => {
+    const speciesData: Record<string, PlotData[]> = {};
+    
+    data.forEach(fish => {
+      const plotPoint = {
+        lengthInches: mmToInches(fish.lengthMm),
+        mercuryPpm: fish.mercuryPpm,
+        species: fish.species,
+        originalData: fish,
+      };
+      
+      if (!speciesData[fish.species]) {
+        speciesData[fish.species] = [];
+      }
+      speciesData[fish.species].push(plotPoint);
+    });
+    
+    return speciesData;
   }, [data]);
+
+  const allPlotData = useMemo(() => {
+    return Object.values(plotDataBySpecies).flat();
+  }, [plotDataBySpecies]);
 
 
   const { yAxisDomain, yAxisTicks } = useMemo(() => {
@@ -79,7 +112,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
             <XAxis
               dataKey="lengthInches"
               type="number"
-              label={{ value: 'Fish Length (inches)', position: 'insideBottom', offset: -4 }}
+              label={{ value: 'Fish Length (inches)', position: 'insideBottom', offset: -8 }}
               domain={[0, 'dataMax']}
               tickFormatter={(value) => value.toFixed(0)}
             />
@@ -92,15 +125,38 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
               tickFormatter={(value) => value === 0 ? '0' : value.toFixed(2).replace(/\.?0+$/, '')}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Scatter
-              data={allPlotData}
-              fill="#1976d2"
-              fillOpacity={0.6}
-              isAnimationActive={false}
-            />
+            {Object.entries(plotDataBySpecies).map(([species, speciesData]) => (
+              <Scatter
+                key={species}
+                data={speciesData}
+                fill={getSpeciesColor(species, selectedSpecies)}
+                fillOpacity={0.6}
+                isAnimationActive={false}
+                name={species}
+              />
+            ))}
           </ScatterChart>
         </ResponsiveContainer>
       </Box>
+      
+      {selectedSpecies.length > 1 && (
+        <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          {selectedSpecies.map(species => (
+            <Chip
+              key={species}
+              label={species}
+              size="small"
+              sx={{
+                backgroundColor: getSpeciesColor(species, selectedSpecies),
+                color: 'white',
+                '& .MuiChip-label': {
+                  fontWeight: 500,
+                },
+              }}
+            />
+          ))}
+        </Box>
+      )}
       
       <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
         Note: FDA advisory level is 1.0 ppm
