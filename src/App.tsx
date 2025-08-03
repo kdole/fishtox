@@ -5,6 +5,7 @@ import { loadFishData } from './utils/csvParser';
 import { FishSample } from './types/fish';
 import { SpeciesPicker } from './components/SpeciesPicker';
 import { MercuryScatterPlot } from './components/MercuryScatterPlot';
+import { FishMap } from './components/FishMap';
 import { getUniqueSpecies, filterBySpecies } from './utils/fishUtils';
 
 const theme = createTheme();
@@ -70,19 +71,32 @@ function App() {
                   </Grid>
                 </Box>
                 
-                <Typography variant="body1" gutterBottom>
-                  {selectedSpecies 
-                    ? `Showing ${filteredData.length} samples of ${selectedSpecies}`
-                    : `Showing all ${fishData.length} fish samples`
-                  }
-                </Typography>
-                
-                <Box my={3}>
-                  <MercuryScatterPlot 
-                    data={filteredData} 
-                    selectedSpecies={selectedSpecies}
-                  />
-                </Box>
+                {selectedSpecies ? (
+                  <>
+                    <Typography variant="body1" gutterBottom>
+                      Showing {filteredData.length} samples of {selectedSpecies}
+                    </Typography>
+                    
+                    <Grid container spacing={3} sx={{ my: 1 }}>
+                      <Grid item xs={12} lg={6}>
+                        <MercuryScatterPlot 
+                          data={filteredData} 
+                          selectedSpecies={selectedSpecies}
+                        />
+                      </Grid>
+                      <Grid item xs={12} lg={6}>
+                        <FishMap 
+                          data={filteredData} 
+                          selectedSpecies={selectedSpecies}
+                        />
+                      </Grid>
+                    </Grid>
+                  </>
+                ) : (
+                  <Typography variant="body1" color="text.secondary" sx={{ my: 3 }}>
+                    Select a fish species to view mercury data and visualizations
+                  </Typography>
+                )}
               </>
             )}
           </Box>
