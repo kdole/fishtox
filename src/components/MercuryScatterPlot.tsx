@@ -3,7 +3,7 @@ import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Responsive
 import { Paper, Typography, Box, Chip } from '@mui/material';
 import { FishSample } from '../types/fish';
 import { mmToInches } from '../utils/csvParser';
-import { powerLawRegression, generateTrendLinePoints, RegressionResult } from '../utils/regression';
+import { powerLawRegression, generateTrendLinePoints, RegressionResult, TrendLinePoint } from '../utils/regression';
 
 interface MercuryScatterPlotProps {
   data: FishSample[];
@@ -77,7 +77,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
   }, [data]);
 
   const regressionResults = useMemo(() => {
-    const results: Record<string, { regression: RegressionResult; trendLine: any[] }> = {};
+    const results: Record<string, { regression: RegressionResult; trendLine: TrendLinePoint[] }> = {};
     
     Object.entries(plotDataBySpecies).forEach(([species, speciesData]) => {
       if (speciesData.length >= 5) { // Need minimum points for meaningful regression
@@ -104,7 +104,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
 
   // Create separate trend line datasets for each species
   const trendLineData = useMemo(() => {
-    const trendData: Record<string, any[]> = {};
+    const trendData: Record<string, Array<TrendLinePoint & { species: string; isTrendPoint: boolean }>> = {};
     
     Object.entries(regressionResults).forEach(([species, { trendLine }]) => {
       trendData[species] = trendLine.map(point => ({

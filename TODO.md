@@ -25,3 +25,5 @@
 - [ ] Add comprehensive test suite
 - [ ] Set up CI/CD pipeline
 - [ ] Add error boundary components
+- [ ] Remove duplication between readme and claude.md?
+- [ ] Do we need anything for state management? (Zustand was removed)
