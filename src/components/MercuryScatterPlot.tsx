@@ -137,12 +137,14 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
                 <Scatter
                   data={filteredPlotData.filter(d => !d.isFiltered)}
                   shape={<XShape />}
+                  isAnimationActive={false}
                 />
                 {/* Filtered points shown normally */}
                 <Scatter
                   data={filteredPlotData.filter(d => d.isFiltered)}
                   fill="#1976d2"
                   fillOpacity={0.6}
+                  isAnimationActive={false}
                 />
               </>
             ) : (
@@ -150,6 +152,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
                 data={allPlotData}
                 fill="#1976d2"
                 fillOpacity={0.6}
+                isAnimationActive={false}
               />
             )}
           </ScatterChart>
