@@ -40,34 +40,55 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     }));
   }, [data]);
 
-  const yAxisDomain = useMemo(() => {
-    if (plotData.length === 0) return [0, 1];
+  const { yAxisDomain, yAxisTicks } = useMemo(() => {
+    if (plotData.length === 0) return { yAxisDomain: [0, 1], yAxisTicks: [0, 0.5, 1] };
+    
     const maxMercury = Math.max(...plotData.map(d => d.mercuryPpm));
-    return [0, Math.ceil(maxMercury * 1.1 * 10) / 10];
+    const maxDomain = Math.ceil(maxMercury * 1.1 * 10) / 10;
+    
+    // Generate nice tick values based on the max value
+    let ticks: number[];
+    if (maxDomain <= 0.1) {
+      ticks = [0, 0.05, 0.1];
+    } else if (maxDomain <= 0.2) {
+      ticks = [0, 0.1, 0.2];
+    } else if (maxDomain <= 0.5) {
+      ticks = [0, 0.2, 0.4, maxDomain];
+    } else if (maxDomain <= 1) {
+      ticks = [0, 0.25, 0.5, 0.75, 1];
+    } else {
+      // For larger values, use automatic ticking
+      ticks = [];
+    }
+    
+    return { yAxisDomain: [0, maxDomain], yAxisTicks: ticks };
   }, [plotData]);
 
   return (
-    <Paper sx={{ p: 2 }}>
+    <Paper sx={{ p: { xs: 1, sm: 2 } }}>
       <Typography variant="h6" gutterBottom>
         Mercury vs Fish Length
         {selectedSpecies && ` - ${selectedSpecies}`}
       </Typography>
       
-      <Box sx={{ width: '100%', height: 400 }}>
+      <Box sx={{ width: '100%', height: { xs: 350, sm: 400 } }}>
         <ResponsiveContainer>
-          <ScatterChart margin={{ top: 20, right: 20, bottom: 60, left: 60 }}>
+          <ScatterChart margin={{ top: 5, right: 5, bottom: 10, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="lengthInches"
               type="number"
-              label={{ value: 'Fish Length (inches)', position: 'insideBottom', offset: -10 }}
+              label={{ value: 'Fish Length (inches)', position: 'insideBottom', offset: -4 }}
               domain={[0, 'dataMax']}
+              tickFormatter={(value) => value.toFixed(0)}
             />
             <YAxis
               dataKey="mercuryPpm"
               type="number"
-              label={{ value: 'Mercury (ppm)', angle: -90, position: 'insideLeft' }}
+              label={{ value: 'Mercury (ppm)', angle: -90, position: 'insideLeft', offset: 10, style: { textAnchor: 'middle' } }}
               domain={yAxisDomain}
+              ticks={yAxisTicks.length > 0 ? yAxisTicks : undefined}
+              tickFormatter={(value) => value === 0 ? '0' : value.toFixed(2).replace(/\.?0+$/, '')}
             />
             <Tooltip content={<CustomTooltip />} />
             <Scatter

@@ -44,7 +44,7 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies }) => {
   }, [data]);
 
   return (
-    <Paper sx={{ p: 2 }}>
+    <Paper sx={{ p: { xs: 1, sm: 2 } }}>
       <Typography variant="h6" gutterBottom>
         Sample Locations
         {selectedSpecies && ` - ${selectedSpecies}`}
