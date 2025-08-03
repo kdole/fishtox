@@ -14,12 +14,14 @@ export const FishToxMain: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
+  const [initialBounds, setInitialBounds] = useState<LatLngBounds | null>(null);
   
-  const { selectedSpecies, setSelectedSpecies } = useUrlState();
+  const { selectedSpecies, setSelectedSpecies, mapBounds: urlMapBounds, setMapBounds: setUrlMapBounds } = useUrlState();
 
   const handleMapBoundsChange = useCallback((bounds: LatLngBounds) => {
     setMapBounds(bounds);
-  }, []);
+    setUrlMapBounds(bounds);
+  }, [setUrlMapBounds]);
 
   useEffect(() => {
     loadFishData()
@@ -33,6 +35,19 @@ export const FishToxMain: React.FC = () => {
         console.error(err);
       });
   }, []);
+
+  useEffect(() => {
+    if (urlMapBounds && !initialBounds) {
+      import('leaflet').then((L) => {
+        const bounds = new L.LatLngBounds(
+          [urlMapBounds.south, urlMapBounds.west],
+          [urlMapBounds.north, urlMapBounds.east]
+        );
+        setInitialBounds(bounds);
+        setMapBounds(bounds);
+      });
+    }
+  }, [urlMapBounds, initialBounds]);
 
   const uniqueSpecies = useMemo(() => getUniqueSpecies(fishData), [fishData]);
   const filteredData = useMemo(() => filterBySpecies(fishData, selectedSpecies), [fishData, selectedSpecies]);
@@ -102,6 +117,7 @@ export const FishToxMain: React.FC = () => {
                       data={filteredData} 
                       selectedSpecies={selectedSpecies}
                       onBoundsChange={handleMapBoundsChange}
+                      initialBounds={initialBounds || undefined}
                     />
                   </Grid>
                 </Grid>

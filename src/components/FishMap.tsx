@@ -10,6 +10,7 @@ interface FishMapProps {
   data: FishSample[];
   selectedSpecies: string[];
   onBoundsChange?: (bounds: LatLngBounds) => void;
+  initialBounds?: LatLngBounds;
 }
 
 const getMarkerColor = (mercuryPpm: number): string => {
@@ -44,21 +45,28 @@ const MapBoundsTracker: React.FC<{ onBoundsChange?: (bounds: LatLngBounds) => vo
 };
 
 // Component to fit map to data bounds only on initial load
-const FitBounds: React.FC<{ bounds?: [[number, number], [number, number]] }> = ({ bounds }) => {
+const FitBounds: React.FC<{ 
+  bounds?: [[number, number], [number, number]]; 
+  initialBounds?: LatLngBounds;
+}> = ({ bounds, initialBounds }) => {
   const map = useMap();
   const hasFitted = useRef(false);
   
   useEffect(() => {
-    if (bounds && !hasFitted.current) {
-      map.fitBounds(bounds);
+    if (!hasFitted.current) {
+      if (initialBounds) {
+        map.fitBounds(initialBounds);
+      } else if (bounds) {
+        map.fitBounds(bounds);
+      }
       hasFitted.current = true;
     }
-  }, [map, bounds]);
+  }, [map, bounds, initialBounds]);
   
   return null;
 };
 
-export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBoundsChange }) => {
+export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBoundsChange, initialBounds }) => {
   const { center, bounds } = useMemo(() => {
     if (data.length === 0) {
       // Default to California center
@@ -97,7 +105,7 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
           center={center}
           style={{ height: '100%', width: '100%' }}
         >
-          <FitBounds bounds={bounds} />
+          <FitBounds bounds={bounds} initialBounds={initialBounds} />
           <MapBoundsTracker onBoundsChange={onBoundsChange} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
