@@ -7,7 +7,6 @@ import { mmToInches } from '../utils/csvParser';
 interface MercuryScatterPlotProps {
   data: FishSample[];
   selectedSpecies: string[];
-  filteredData?: FishSample[];
 }
 
 interface PlotData {
@@ -15,7 +14,6 @@ interface PlotData {
   mercuryPpm: number;
   species: string;
   originalData: FishSample;
-  isFiltered?: boolean;
 }
 
 const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
@@ -32,35 +30,7 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload
   return null;
 };
 
-const XShape: React.FC<any> = (props) => {
-  const { cx, cy } = props;
-  const size = 4;
-  
-  return (
-    <g>
-      <line 
-        x1={cx - size} 
-        y1={cy - size} 
-        x2={cx + size} 
-        y2={cy + size} 
-        stroke="#888888" 
-        strokeWidth="1.5"
-        opacity={0.4}
-      />
-      <line 
-        x1={cx - size} 
-        y1={cy + size} 
-        x2={cx + size} 
-        y2={cy - size} 
-        stroke="#888888" 
-        strokeWidth="1.5"
-        opacity={0.4}
-      />
-    </g>
-  );
-};
-
-export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, selectedSpecies, filteredData }) => {
+export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, selectedSpecies }) => {
   const allPlotData = useMemo(() => {
     return data.map(fish => ({
       lengthInches: mmToInches(fish.lengthMm),
@@ -70,15 +40,6 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     }));
   }, [data]);
 
-  const filteredPlotData = useMemo(() => {
-    if (!filteredData) return allPlotData.map(point => ({ ...point, isFiltered: true }));
-    
-    const filteredSet = new Set(filteredData);
-    return allPlotData.map(point => ({
-      ...point,
-      isFiltered: filteredSet.has(point.originalData),
-    }));
-  }, [allPlotData, filteredData]);
 
   const { yAxisDomain, yAxisTicks } = useMemo(() => {
     if (allPlotData.length === 0) return { yAxisDomain: [0, 1], yAxisTicks: [0, 0.5, 1] };
@@ -131,30 +92,12 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
               tickFormatter={(value) => value === 0 ? '0' : value.toFixed(2).replace(/\.?0+$/, '')}
             />
             <Tooltip content={<CustomTooltip />} />
-            {filteredData ? (
-              <>
-                {/* Unfiltered points shown as faint X markers */}
-                <Scatter
-                  data={filteredPlotData.filter(d => !d.isFiltered)}
-                  shape={<XShape />}
-                  isAnimationActive={false}
-                />
-                {/* Filtered points shown normally */}
-                <Scatter
-                  data={filteredPlotData.filter(d => d.isFiltered)}
-                  fill="#1976d2"
-                  fillOpacity={0.6}
-                  isAnimationActive={false}
-                />
-              </>
-            ) : (
-              <Scatter
-                data={allPlotData}
-                fill="#1976d2"
-                fillOpacity={0.6}
-                isAnimationActive={false}
-              />
-            )}
+            <Scatter
+              data={allPlotData}
+              fill="#1976d2"
+              fillOpacity={0.6}
+              isAnimationActive={false}
+            />
           </ScatterChart>
         </ResponsiveContainer>
       </Box>

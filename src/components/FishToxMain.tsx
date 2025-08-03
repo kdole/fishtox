@@ -93,9 +93,8 @@ export const FishToxMain: React.FC = () => {
                 <Grid container spacing={3} sx={{ my: 1 }}>
                   <Grid item xs={12} lg={6}>
                     <MercuryScatterPlot 
-                      data={filteredData} 
+                      data={mapBounds ? mapFilteredData : filteredData} 
                       selectedSpecies={selectedSpecies}
-                      filteredData={mapFilteredData}
                     />
                   </Grid>
                   <Grid item xs={12} lg={6}>
