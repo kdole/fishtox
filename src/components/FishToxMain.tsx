@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Container, Typography, Box, CircularProgress, Alert, Grid } from '@mui/material';
 import { loadFishData } from '../utils/csvParser';
 import { FishSample } from '../types/fish';
@@ -7,13 +7,19 @@ import { MercuryScatterPlot } from './MercuryScatterPlot';
 import { FishMap } from './FishMap';
 import { getUniqueSpecies, filterBySpecies } from '../utils/fishUtils';
 import { useUrlState } from '../hooks/useUrlState';
+import type { LatLngBounds } from 'leaflet';
 
 export const FishToxMain: React.FC = () => {
   const [fishData, setFishData] = useState<FishSample[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
   
   const { selectedSpecies, setSelectedSpecies } = useUrlState();
+
+  const handleMapBoundsChange = useCallback((bounds: LatLngBounds) => {
+    setMapBounds(bounds);
+  }, []);
 
   useEffect(() => {
     loadFishData()
@@ -30,6 +36,14 @@ export const FishToxMain: React.FC = () => {
 
   const uniqueSpecies = useMemo(() => getUniqueSpecies(fishData), [fishData]);
   const filteredData = useMemo(() => filterBySpecies(fishData, selectedSpecies), [fishData, selectedSpecies]);
+  
+  const mapFilteredData = useMemo(() => {
+    if (!mapBounds) return filteredData;
+    
+    return filteredData.filter(fish => 
+      mapBounds.contains([fish.latitude, fish.longitude])
+    );
+  }, [filteredData, mapBounds]);
 
   return (
     <Container maxWidth="lg">
@@ -71,6 +85,9 @@ export const FishToxMain: React.FC = () => {
               <>
                 <Typography variant="body1" gutterBottom>
                   Showing {filteredData.length} samples of {selectedSpecies.join(', ')}
+                  {mapBounds && mapFilteredData.length !== filteredData.length && 
+                    ` (${mapFilteredData.length} in map view)`
+                  }
                 </Typography>
                 
                 <Grid container spacing={3} sx={{ my: 1 }}>
@@ -78,12 +95,14 @@ export const FishToxMain: React.FC = () => {
                     <MercuryScatterPlot 
                       data={filteredData} 
                       selectedSpecies={selectedSpecies}
+                      filteredData={mapFilteredData}
                     />
                   </Grid>
                   <Grid item xs={12} lg={6}>
                     <FishMap 
                       data={filteredData} 
                       selectedSpecies={selectedSpecies}
+                      onBoundsChange={handleMapBoundsChange}
                     />
                   </Grid>
                 </Grid>

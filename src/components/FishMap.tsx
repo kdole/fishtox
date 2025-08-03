@@ -1,13 +1,15 @@
-import React, { useMemo } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
+import React, { useMemo, useEffect, useRef } from 'react';
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import { Paper, Typography, Box } from '@mui/material';
 import { FishSample } from '../types/fish';
 import { mmToInches } from '../utils/csvParser';
+import type { LatLngBounds } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 interface FishMapProps {
   data: FishSample[];
   selectedSpecies: string[];
+  onBoundsChange?: (bounds: LatLngBounds) => void;
 }
 
 const getMarkerColor = (mercuryPpm: number): string => {
@@ -16,7 +18,47 @@ const getMarkerColor = (mercuryPpm: number): string => {
   return '#4caf50'; // Green for low mercury
 };
 
-export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies }) => {
+// Component to track map bounds changes
+const MapBoundsTracker: React.FC<{ onBoundsChange?: (bounds: LatLngBounds) => void }> = ({ onBoundsChange }) => {
+  const map = useMapEvents({
+    moveend: () => {
+      if (onBoundsChange) {
+        onBoundsChange(map.getBounds());
+      }
+    },
+    zoomend: () => {
+      if (onBoundsChange) {
+        onBoundsChange(map.getBounds());
+      }
+    },
+  });
+
+  useEffect(() => {
+    // Report initial bounds
+    if (onBoundsChange) {
+      onBoundsChange(map.getBounds());
+    }
+  }, [map, onBoundsChange]);
+
+  return null;
+};
+
+// Component to fit map to data bounds only on initial load
+const FitBounds: React.FC<{ bounds?: [[number, number], [number, number]] }> = ({ bounds }) => {
+  const map = useMap();
+  const hasFitted = useRef(false);
+  
+  useEffect(() => {
+    if (bounds && !hasFitted.current) {
+      map.fitBounds(bounds);
+      hasFitted.current = true;
+    }
+  }, [map, bounds]);
+  
+  return null;
+};
+
+export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBoundsChange }) => {
   const { center, bounds } = useMemo(() => {
     if (data.length === 0) {
       // Default to California center
@@ -53,10 +95,10 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies }) => {
       <Box sx={{ height: 400, width: '100%' }}>
         <MapContainer
           center={center}
-          zoom={8}
-          bounds={bounds}
           style={{ height: '100%', width: '100%' }}
         >
+          <FitBounds bounds={bounds} />
+          <MapBoundsTracker onBoundsChange={onBoundsChange} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

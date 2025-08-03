@@ -7,6 +7,7 @@ import { mmToInches } from '../utils/csvParser';
 interface MercuryScatterPlotProps {
   data: FishSample[];
   selectedSpecies: string[];
+  filteredData?: FishSample[];
 }
 
 interface PlotData {
@@ -14,6 +15,7 @@ interface PlotData {
   mercuryPpm: number;
   species: string;
   originalData: FishSample;
+  isFiltered?: boolean;
 }
 
 const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
@@ -30,8 +32,36 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload
   return null;
 };
 
-export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, selectedSpecies }) => {
-  const plotData = useMemo(() => {
+const XShape: React.FC<any> = (props) => {
+  const { cx, cy } = props;
+  const size = 4;
+  
+  return (
+    <g>
+      <line 
+        x1={cx - size} 
+        y1={cy - size} 
+        x2={cx + size} 
+        y2={cy + size} 
+        stroke="#888888" 
+        strokeWidth="1.5"
+        opacity={0.4}
+      />
+      <line 
+        x1={cx - size} 
+        y1={cy + size} 
+        x2={cx + size} 
+        y2={cy - size} 
+        stroke="#888888" 
+        strokeWidth="1.5"
+        opacity={0.4}
+      />
+    </g>
+  );
+};
+
+export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, selectedSpecies, filteredData }) => {
+  const allPlotData = useMemo(() => {
     return data.map(fish => ({
       lengthInches: mmToInches(fish.lengthMm),
       mercuryPpm: fish.mercuryPpm,
@@ -40,10 +70,20 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     }));
   }, [data]);
 
-  const { yAxisDomain, yAxisTicks } = useMemo(() => {
-    if (plotData.length === 0) return { yAxisDomain: [0, 1], yAxisTicks: [0, 0.5, 1] };
+  const filteredPlotData = useMemo(() => {
+    if (!filteredData) return allPlotData.map(point => ({ ...point, isFiltered: true }));
     
-    const maxMercury = Math.max(...plotData.map(d => d.mercuryPpm));
+    const filteredSet = new Set(filteredData);
+    return allPlotData.map(point => ({
+      ...point,
+      isFiltered: filteredSet.has(point.originalData),
+    }));
+  }, [allPlotData, filteredData]);
+
+  const { yAxisDomain, yAxisTicks } = useMemo(() => {
+    if (allPlotData.length === 0) return { yAxisDomain: [0, 1], yAxisTicks: [0, 0.5, 1] };
+    
+    const maxMercury = Math.max(...allPlotData.map(d => d.mercuryPpm));
     const maxDomain = Math.ceil(maxMercury * 1.1 * 10) / 10;
     
     // Generate nice tick values based on the max value
@@ -62,7 +102,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     }
     
     return { yAxisDomain: [0, maxDomain], yAxisTicks: ticks };
-  }, [plotData]);
+  }, [allPlotData]);
 
   return (
     <Paper sx={{ p: { xs: 1, sm: 2 } }}>
@@ -91,11 +131,27 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
               tickFormatter={(value) => value === 0 ? '0' : value.toFixed(2).replace(/\.?0+$/, '')}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Scatter
-              data={plotData}
-              fill="#1976d2"
-              fillOpacity={0.6}
-            />
+            {filteredData ? (
+              <>
+                {/* Unfiltered points shown as faint X markers */}
+                <Scatter
+                  data={filteredPlotData.filter(d => !d.isFiltered)}
+                  shape={<XShape />}
+                />
+                {/* Filtered points shown normally */}
+                <Scatter
+                  data={filteredPlotData.filter(d => d.isFiltered)}
+                  fill="#1976d2"
+                  fillOpacity={0.6}
+                />
+              </>
+            ) : (
+              <Scatter
+                data={allPlotData}
+                fill="#1976d2"
+                fillOpacity={0.6}
+              />
+            )}
           </ScatterChart>
         </ResponsiveContainer>
       </Box>
