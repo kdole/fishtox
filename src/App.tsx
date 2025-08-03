@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { loadFishData } from './utils/csvParser';
 import { FishSample } from './types/fish';
 import { SpeciesPicker } from './components/SpeciesPicker';
+import { MercuryScatterPlot } from './components/MercuryScatterPlot';
 import { getUniqueSpecies, filterBySpecies } from './utils/fishUtils';
 
 const theme = createTheme();
@@ -75,6 +76,13 @@ function App() {
                     : `Showing all ${fishData.length} fish samples`
                   }
                 </Typography>
+                
+                <Box my={3}>
+                  <MercuryScatterPlot 
+                    data={filteredData} 
+                    selectedSpecies={selectedSpecies}
+                  />
+                </Box>
               </>
             )}
           </Box>
