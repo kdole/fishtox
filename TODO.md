@@ -5,8 +5,9 @@
 ### UI/UX Improvements
 - [ ] Decide how to color code or otherwise visualize multiple species on both the scatterplot and the map, while still giving information about mercury levels
 - [ ] Add background colors to scatterplot for consumption thresholds
+- [ ] Implement analytics tracking (web-vitals)
 - [ ] Performance with species like Largemouth Bass
-- [ ] Improved display of multiple points at same map location
+- [ ] Improved display of multiple points at same map location (map is tricky: species, mercury, number of points)
 - [ ] Add disclaimer and link to authoritative reference
 - [ ] Add license
 
@@ -24,4 +25,3 @@
 - [ ] Add comprehensive test suite
 - [ ] Set up CI/CD pipeline
 - [ ] Add error boundary components
-- [ ] Implement analytics tracking
