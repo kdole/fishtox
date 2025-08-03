@@ -3,6 +3,7 @@ import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Responsive
 import { Paper, Typography, Box, Chip } from '@mui/material';
 import { FishSample } from '../types/fish';
 import { mmToInches } from '../utils/csvParser';
+import { powerLawRegression, generateTrendLinePoints, RegressionResult } from '../utils/regression';
 
 interface MercuryScatterPlotProps {
   data: FishSample[];
@@ -36,7 +37,13 @@ const getSpeciesColor = (species: string, allSpecies: string[]): string => {
 
 const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
   if (active && payload && payload.length > 0) {
-    const data = payload[0].payload as PlotData;
+    const data = payload[0].payload as PlotData & { isTrendPoint?: boolean };
+    
+    if (data.isTrendPoint) {
+      // Don't show tooltips for trend line points
+      return null;
+    }
+    
     return (
       <Paper sx={{ p: 1 }}>
         <Typography variant="body2">{data.species}</Typography>
@@ -69,15 +76,54 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     return speciesData;
   }, [data]);
 
-  const allPlotData = useMemo(() => {
-    return Object.values(plotDataBySpecies).flat();
+  const regressionResults = useMemo(() => {
+    const results: Record<string, { regression: RegressionResult; trendLine: any[] }> = {};
+    
+    Object.entries(plotDataBySpecies).forEach(([species, speciesData]) => {
+      if (speciesData.length >= 5) { // Need minimum points for meaningful regression
+        const xValues = speciesData.map(d => d.lengthInches);
+        const yValues = speciesData.map(d => d.mercuryPpm);
+        
+        const regression = powerLawRegression(xValues, yValues);
+        if (regression && regression.rSquared > 0.1) { // Only show if reasonably good fit
+          const minX = Math.min(...xValues);
+          const maxX = Math.max(...xValues);
+          const trendPoints = generateTrendLinePoints(regression, minX, maxX);
+          
+          results[species] = {
+            regression,
+            trendLine: trendPoints,
+          };
+        }
+      }
+    });
+    
+    return results;
   }, [plotDataBySpecies]);
 
 
-  const { yAxisDomain, yAxisTicks } = useMemo(() => {
-    if (allPlotData.length === 0) return { yAxisDomain: [0, 1], yAxisTicks: [0, 0.5, 1] };
+  // Create separate trend line datasets for each species
+  const trendLineData = useMemo(() => {
+    const trendData: Record<string, any[]> = {};
     
-    const maxMercury = Math.max(...allPlotData.map(d => d.mercuryPpm));
+    Object.entries(regressionResults).forEach(([species, { trendLine }]) => {
+      trendData[species] = trendLine.map(point => ({
+        lengthInches: point.lengthInches,
+        mercuryPpm: point.mercuryPpm,
+        species,
+        isTrendPoint: true,
+      }));
+    });
+    
+    return trendData;
+  }, [regressionResults]);
+
+
+  const { yAxisDomain, yAxisTicks } = useMemo(() => {
+    const originalPoints = Object.values(plotDataBySpecies).flat();
+    if (originalPoints.length === 0) return { yAxisDomain: [0, 1], yAxisTicks: [0, 0.5, 1] };
+    
+    const maxMercury = Math.max(...originalPoints.map(d => d.mercuryPpm));
     const maxDomain = Math.ceil(maxMercury * 1.1 * 10) / 10;
     
     // Generate nice tick values based on the max value
@@ -96,7 +142,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     }
     
     return { yAxisDomain: [0, maxDomain], yAxisTicks: ticks };
-  }, [allPlotData]);
+  }, [plotDataBySpecies]);
 
   return (
     <Paper sx={{ p: { xs: 1, sm: 2 } }}>
@@ -105,7 +151,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
         {selectedSpecies.length > 0 && ` - ${selectedSpecies.join(', ')}`}
       </Typography>
       
-      <Box sx={{ width: '100%', height: { xs: 350, sm: 400 } }}>
+      <Box sx={{ width: '100%', height: { xs: 350, sm: 400 }, position: 'relative' }}>
         <ResponsiveContainer>
           <ScatterChart margin={{ top: 5, right: 5, bottom: 10, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -125,6 +171,8 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
               tickFormatter={(value) => value === 0 ? '0' : value.toFixed(2).replace(/\.?0+$/, '')}
             />
             <Tooltip content={<CustomTooltip />} />
+            
+            {/* Render scatter points for each species */}
             {Object.entries(plotDataBySpecies).map(([species, speciesData]) => (
               <Scatter
                 key={species}
@@ -135,26 +183,51 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
                 name={species}
               />
             ))}
+            
+            {/* Render trend lines as separate scatter series with line connection */}
+            {Object.entries(trendLineData).map(([species, trendPoints]) => (
+              <Scatter
+                key={`trend-${species}`}
+                data={trendPoints}
+                fill="transparent"
+                shape="circle"
+                line={{ 
+                  stroke: getSpeciesColor(species, selectedSpecies), 
+                  strokeWidth: 2, 
+                  strokeDasharray: '5 5' 
+                }}
+                isAnimationActive={false}
+              />
+            ))}
           </ScatterChart>
         </ResponsiveContainer>
       </Box>
       
       {selectedSpecies.length > 1 && (
         <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {selectedSpecies.map(species => (
-            <Chip
-              key={species}
-              label={species}
-              size="small"
-              sx={{
-                backgroundColor: getSpeciesColor(species, selectedSpecies),
-                color: 'white',
-                '& .MuiChip-label': {
-                  fontWeight: 500,
-                },
-              }}
-            />
-          ))}
+          {selectedSpecies.map(species => {
+            const regression = regressionResults[species]?.regression;
+            const hasRegression = !!regression;
+            
+            return (
+              <Chip
+                key={species}
+                label={
+                  hasRegression 
+                    ? `${species} (R² = ${regression.rSquared.toFixed(2)})`
+                    : species
+                }
+                size="small"
+                sx={{
+                  backgroundColor: getSpeciesColor(species, selectedSpecies),
+                  color: 'white',
+                  '& .MuiChip-label': {
+                    fontWeight: 500,
+                  },
+                }}
+              />
+            );
+          })}
         </Box>
       )}
       
