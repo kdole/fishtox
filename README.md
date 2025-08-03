@@ -37,7 +37,7 @@ The application is primarily designed for anglers who want to make informed deci
 ## Tech Stack
 
 - **TypeScript + React**: Type-safe component development
-- **Vite**: Fast build tool with excellent development experience
+- **Create React App**: Build tooling and development environment
 - **React Router**: URL state management for shareable views
 - **Zustand**: Lightweight state management
 - **Material-UI (MUI)**: Component library with excellent Autocomplete
@@ -111,11 +111,55 @@ fishtox/
 │   ├── types/
 │   └── App.tsx
 ├── public/
+│   └── CNAME              # Custom domain for GitHub Pages
 ├── README.md
-├── CLAUDE.md
+├── CLAUDE.md              # AI assistant instructions
 └── package.json
 ```
 
 ## Getting Started
 
-(Coming soon - project setup instructions)
+### Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm start
+
+# Run tests
+npm test
+
+# Type checking
+npm run typecheck
+
+# Linting
+npm run lint
+
+# Build for production
+npm run build
+```
+
+### Deployment
+
+The app is deployed to GitHub Pages at https://fishtox.com
+
+```bash
+# Deploy to GitHub Pages
+npm run deploy
+```
+
+Deployment is configured to:
+- Build the production bundle
+- Push to the `gh-pages` branch
+- Serve from custom domain fishtox.com
+
+### Repository
+
+- **GitHub**: https://github.com/kdole/fishtox
+- **Live Site**: https://fishtox.com
+
+## Contributing
+
+This is an open-source project. Contributions that improve data accuracy, add new features, or enhance the user experience are welcome.

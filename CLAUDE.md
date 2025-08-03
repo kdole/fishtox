@@ -113,4 +113,37 @@ npm run typecheck
 - **State**: Zustand for global state, React Router for URL state
 - **Build**: Create React App with TypeScript
 
+## Deployment
+
+The app is deployed to GitHub Pages at https://fishtox.com
+
+### Deployment Setup
+- **Hosting**: GitHub Pages (free, requires public repo)
+- **Domain**: Custom domain fishtox.com via Namecheap
+- **Package**: Uses `gh-pages` npm package for deployment
+- **Branch**: Deploys from `gh-pages` branch (auto-generated)
+
+### Deploy Commands
+```bash
+npm run deploy  # Builds and deploys to GitHub Pages
+```
+
+### Domain Configuration (Already Set Up)
+- **Namecheap DNS**:
+  - 4 A Records pointing to GitHub Pages IPs (185.199.108-111.153)
+  - CNAME record: www → kdole.github.io
+- **GitHub Pages**:
+  - Custom domain: fishtox.com
+  - HTTPS enforced
+  - Deploy from gh-pages branch root
+
+### Important Files
+- `public/CNAME`: Contains "fishtox.com" for custom domain
+- `package.json`: Contains "homepage": "https://fishtox.com"
+
+### Repository
+- **GitHub**: https://github.com/kdole/fishtox
+- **Status**: Public repository (required for free GitHub Pages)
+- **Live Site**: https://fishtox.com
+
 Remember: Simple, clean, and fast. When in doubt, choose the simpler solution.
