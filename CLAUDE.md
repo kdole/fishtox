@@ -9,9 +9,10 @@ FishTox is a client-side web application that helps California anglers understan
 ## Key Constraints
 
 1. **No Backend**: This is a static site. Do not create API endpoints, servers, or backend code.
-2. **Performance Matters**: The app loads ~1MB of CSV data. Keep additional JS bundle minimal.
+2. **Performance Matters**: The app loads ~1MB of CSV data (~22,500 fish samples). Keep additional JS bundle minimal.
 3. **Mobile First**: Primary users are anglers checking data on their phones at fishing spots.
 4. **Data is Static**: The CSV in `/data` is the source of truth. Don't fetch external data.
+5. **Browser Support**: Use modern ES6+ features with Create React App defaults.
 
 ## Code Style Guidelines
 
@@ -20,11 +21,11 @@ FishTox is a client-side web application that helps California anglers understan
 - Define interfaces for all data structures, especially:
   ```typescript
   interface FishSample {
-    species: string;
-    mercuryPpm: number;
-    lengthMm: number;
-    latitude: number;
-    longitude: number;
+    species: string;        // From CompositeCommonName column
+    mercuryPpm: number;     // From Result column (wet weight)
+    lengthMm: number;       // From TLAvgLength(mm) column
+    latitude: number;       // From latitude column
+    longitude: number;      // From longitude column
   }
   ```
 - Use type inference where obvious, explicit types where helpful
@@ -88,5 +89,28 @@ npm run typecheck
 3. Consider mobile UX before implementing
 4. Test with the actual CSV data, not mocked data
 5. Update types if data structure changes
+
+## Data Details
+
+### CSV Structure
+- **File**: `/data/filtered_ceden_mercury.csv`
+- **Size**: ~22,500 rows
+- **Columns**:
+  - `CompositeCommonName`: Species common name (display as "Species")
+  - `Result`: Mercury concentration in ppm wet weight (display as "Mercury (ppm)")
+  - `TLAvgLength(mm)`: Average total length in mm (display as "Length" and convert to inches)
+  - `latitude`: Decimal degrees
+  - `longitude`: Decimal degrees
+
+### Unit Conversions
+- Length: 1 inch = 25.4 mm (display lengths in inches for US anglers)
+- Mercury: Display as ppm with 2-3 decimal places
+
+## Technology Stack
+
+- **Map**: React-Leaflet (lightweight, no API key required)
+- **Charts**: Consider Recharts or Victory for scatter plots
+- **State**: Zustand for global state, React Router for URL state
+- **Build**: Create React App with TypeScript
 
 Remember: Simple, clean, and fast. When in doubt, choose the simpler solution.
