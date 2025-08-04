@@ -1,8 +1,9 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from 'react-leaflet';
-import { Paper, Typography, Box } from '@mui/material';
+import { Paper, Typography, Box, Chip } from '@mui/material';
 import { FishSample } from '../types/fish';
 import { mmToInches } from '../utils/csvParser';
+import { getSpeciesColor } from '../utils/constants';
 import type { LatLngBounds } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -13,11 +14,6 @@ interface FishMapProps {
   initialBounds?: LatLngBounds;
 }
 
-const getMarkerColor = (mercuryPpm: number): string => {
-  if (mercuryPpm >= 1.0) return '#d32f2f'; // Red for high mercury (FDA advisory level)
-  if (mercuryPpm >= 0.5) return '#ff9800'; // Orange for medium mercury
-  return '#4caf50'; // Green for low mercury
-};
 
 // Component to track map bounds changes
 const MapBoundsTracker: React.FC<{ onBoundsChange?: (bounds: LatLngBounds) => void }> = ({ onBoundsChange }) => {
@@ -116,24 +112,26 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
             <CircleMarker
               key={index}
               center={[fish.latitude, fish.longitude]}
-              radius={6}
-              fillColor={getMarkerColor(fish.mercuryPpm)}
+              radius={7}
+              fillColor={getSpeciesColor(fish.species, selectedSpecies)}
               color="white"
-              weight={1}
+              weight={2}
               opacity={1}
-              fillOpacity={0.8}
+              fillOpacity={0.7}
             >
               <Popup>
                 <Box>
-                  <Typography variant="subtitle2">{fish.species}</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
+                    {fish.species}
+                  </Typography>
                   <Typography variant="body2">
                     Length: {mmToInches(fish.lengthMm).toFixed(1)}"
                   </Typography>
                   <Typography variant="body2">
                     Mercury: {fish.mercuryPpm.toFixed(3)} ppm
                   </Typography>
-                  <Typography variant="body2">
-                    Location: {fish.latitude.toFixed(3)}, {fish.longitude.toFixed(3)}
+                  <Typography variant="body2" color="text.secondary">
+                    Location: {fish.latitude.toFixed(4)}, {fish.longitude.toFixed(4)}
                   </Typography>
                 </Box>
               </Popup>
@@ -142,20 +140,28 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
         </MapContainer>
       </Box>
       
-      <Box sx={{ display: 'flex', gap: 2, mt: 1, alignItems: 'center' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Box sx={{ width: 12, height: 12, bgcolor: '#4caf50', borderRadius: '50%' }} />
-          <Typography variant="caption">Low (&lt;0.5 ppm)</Typography>
+      {selectedSpecies.length > 1 && (
+        <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          {selectedSpecies.map(species => (
+            <Chip
+              key={species}
+              label={species}
+              size="small"
+              sx={{
+                backgroundColor: getSpeciesColor(species, selectedSpecies),
+                color: 'white',
+                '& .MuiChip-label': {
+                  fontWeight: 500,
+                },
+              }}
+            />
+          ))}
         </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Box sx={{ width: 12, height: 12, bgcolor: '#ff9800', borderRadius: '50%' }} />
-          <Typography variant="caption">Medium (0.5-1.0 ppm)</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          <Box sx={{ width: 12, height: 12, bgcolor: '#d32f2f', borderRadius: '50%' }} />
-          <Typography variant="caption">High (≥1.0 ppm)</Typography>
-        </Box>
-      </Box>
+      )}
+      
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+        Zoom in to see individual samples at the same location. Colors match the species in the scatter plot.
+      </Typography>
     </Paper>
   );
 };

@@ -4,6 +4,7 @@ import { Paper, Typography, Box, Chip } from '@mui/material';
 import { FishSample } from '../types/fish';
 import { mmToInches } from '../utils/csvParser';
 import { powerLawRegression, generateTrendLinePoints, RegressionResult, TrendLinePoint } from '../utils/regression';
+import { getSpeciesColor } from '../utils/constants';
 
 interface MercuryScatterPlotProps {
   data: FishSample[];
@@ -17,23 +18,6 @@ interface PlotData {
   originalData: FishSample;
 }
 
-const SPECIES_COLORS = [
-  '#1976d2', // Blue
-  '#d32f2f', // Red
-  '#388e3c', // Green
-  '#f57c00', // Orange
-  '#7b1fa2', // Purple
-  '#0288d1', // Light Blue
-  '#c2185b', // Pink
-  '#5d4037', // Brown
-  '#455a64', // Blue Grey
-  '#e64a19', // Deep Orange
-];
-
-const getSpeciesColor = (species: string, allSpecies: string[]): string => {
-  const index = allSpecies.indexOf(species);
-  return SPECIES_COLORS[index % SPECIES_COLORS.length];
-};
 
 // California OEHHA Advisory Tissue Levels (ATLs) for mercury
 // For general population (Women >45 and men) - converted from ppb to ppm

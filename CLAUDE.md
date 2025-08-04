@@ -151,6 +151,13 @@ npm test
 - Length: 1 inch = 25.4 mm (display lengths in inches for US anglers)
 - Mercury: Display as ppm with 2-3 decimal places
 
+## Development Server
+
+Before starting the development server, check if it's already running:
+- The user likely has `npm start` running already
+- Don't attempt to start it again unless the user explicitly says it's not running
+- If you need to test changes, just refresh the browser
+
 ## Technology Stack
 
 - **Map**: React-Leaflet (lightweight, no API key required)
