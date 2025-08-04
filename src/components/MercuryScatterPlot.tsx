@@ -309,8 +309,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
       )}
       
       <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-        California OEHHA Advisory Tissue Levels show safe consumption rates (servings/week). 
-        Based on general population recommendations.
+        Safe consumption rates for adults in servings/week from California OEHHA.
       </Typography>
     </Paper>
   );

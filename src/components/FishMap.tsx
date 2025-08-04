@@ -159,9 +159,6 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
         </Box>
       )}
       
-      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-        Zoom in to see individual samples at the same location. Colors match the species in the scatter plot.
-      </Typography>
     </Paper>
   );
 };
