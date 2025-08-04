@@ -106,6 +106,10 @@ export const FishToxMain: React.FC = () => {
                   )}
                 </Typography>
                 
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                  💡 Tip: Zoom and pan the map to filter the scatter plot data
+                </Typography>
+                
                 <Grid container spacing={3} sx={{ my: 1 }}>
                   <Grid item xs={12} lg={6}>
                     <MercuryScatterPlot 
