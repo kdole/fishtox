@@ -93,7 +93,6 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
     <Paper sx={{ p: { xs: 1, sm: 2 } }}>
       <Typography variant="h6" gutterBottom>
         Sample Locations
-        {selectedSpecies.length > 0 && ` - ${selectedSpecies.join(', ')}`}
       </Typography>
       
       <Box sx={{ height: 400, width: '100%' }}>
@@ -140,7 +139,7 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
         </MapContainer>
       </Box>
       
-      {selectedSpecies.length > 1 && (
+      {selectedSpecies.length > 0 && (
         <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {selectedSpecies.map(species => (
             <Chip

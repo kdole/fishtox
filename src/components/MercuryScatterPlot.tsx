@@ -198,7 +198,6 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     <Paper sx={{ p: { xs: 1, sm: 2 } }}>
       <Typography variant="h6" gutterBottom>
         Mercury vs Fish Length
-        {selectedSpecies.length > 0 && ` - ${selectedSpecies.join(', ')}`}
       </Typography>
       
       <Box sx={{ width: '100%', height: { xs: 350, sm: 400 }, position: 'relative' }}>
@@ -280,7 +279,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
         </ResponsiveContainer>
       </Box>
       
-      {selectedSpecies.length > 1 && (
+      {selectedSpecies.length > 0 && (
         <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {selectedSpecies.map(species => {
             const regression = regressionResults[species]?.regression;

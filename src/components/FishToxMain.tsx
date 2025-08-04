@@ -99,10 +99,11 @@ export const FishToxMain: React.FC = () => {
             {selectedSpecies.length > 0 ? (
               <>
                 <Typography variant="body1" gutterBottom>
-                  Showing {filteredData.length} samples of {selectedSpecies.join(', ')}
-                  {mapBounds && mapFilteredData.length !== filteredData.length && 
-                    ` (${mapFilteredData.length} in map view)`
-                  }
+                  {mapBounds && mapFilteredData.length !== filteredData.length ? (
+                    <>Showing {mapFilteredData.length} {selectedSpecies.join(', ')} samples (filtered by map bounds)</>
+                  ) : (
+                    <>Showing {filteredData.length} {selectedSpecies.join(', ')} samples</>
+                  )}
                 </Typography>
                 
                 <Grid container spacing={3} sx={{ my: 1 }}>
