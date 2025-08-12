@@ -15,7 +15,7 @@ export const FishToxMain: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
   const [initialBounds, setInitialBounds] = useState<LatLngBounds | null>(null);
-  
+
   const { selectedSpecies, setSelectedSpecies, mapBounds: urlMapBounds, setMapBounds: setUrlMapBounds } = useUrlState();
 
   const handleMapBoundsChange = useCallback((bounds: LatLngBounds) => {
@@ -51,11 +51,11 @@ export const FishToxMain: React.FC = () => {
 
   const uniqueSpecies = useMemo(() => getUniqueSpecies(fishData), [fishData]);
   const filteredData = useMemo(() => filterBySpecies(fishData, selectedSpecies), [fishData, selectedSpecies]);
-  
+
   const mapFilteredData = useMemo(() => {
     if (!mapBounds) return filteredData;
-    
-    return filteredData.filter(fish => 
+
+    return filteredData.filter(fish =>
       mapBounds.contains([fish.latitude, fish.longitude])
     );
   }, [filteredData, mapBounds]);
@@ -69,19 +69,19 @@ export const FishToxMain: React.FC = () => {
         <Typography variant="subtitle1" gutterBottom>
           Mercury levels in California fish
         </Typography>
-        
+
         {loading && (
           <Box display="flex" justifyContent="center" py={4}>
             <CircularProgress />
           </Box>
         )}
-        
+
         {error && (
           <Alert severity="error" sx={{ my: 2 }}>
             {error}
           </Alert>
         )}
-        
+
         {!loading && !error && (
           <>
             <Box my={3}>
@@ -95,7 +95,7 @@ export const FishToxMain: React.FC = () => {
                 </Grid>
               </Grid>
             </Box>
-            
+
             {selectedSpecies.length > 0 ? (
               <>
                 <Typography variant="body1" gutterBottom>
@@ -105,27 +105,40 @@ export const FishToxMain: React.FC = () => {
                     <>Showing {filteredData.length} {selectedSpecies.join(', ')} samples</>
                   )}
                 </Typography>
-                
+
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                   💡 Tip: Zoom and pan the map to filter the scatter plot data
                 </Typography>
-                
+
                 <Grid container spacing={3} sx={{ my: 1 }}>
                   <Grid item xs={12} lg={6}>
-                    <MercuryScatterPlot 
-                      data={mapBounds ? mapFilteredData : filteredData} 
+                    <MercuryScatterPlot
+                      data={mapBounds ? mapFilteredData : filteredData}
                       selectedSpecies={selectedSpecies}
                     />
                   </Grid>
                   <Grid item xs={12} lg={6}>
-                    <FishMap 
-                      data={filteredData} 
+                    <FishMap
+                      data={filteredData}
                       selectedSpecies={selectedSpecies}
                       onBoundsChange={handleMapBoundsChange}
                       initialBounds={initialBounds || undefined}
                     />
                   </Grid>
                 </Grid>
+
+                <Typography variant="caption" color="text.secondary" align="center" display="block" sx={{ mt: 4 }}>
+                  Informational purposes only. See the{' '}
+                  <a
+                    href="https://oehha.ca.gov/fish/advisories"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: 'inherit' }}
+                  >
+                    California OEHHA Fish Advisories
+                  </a>{' '}
+                  for official guidance.
+                </Typography>
               </>
             ) : (
               <Typography variant="body1" color="text.secondary" sx={{ my: 3 }}>

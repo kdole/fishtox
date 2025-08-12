@@ -7,7 +7,6 @@
 - [ ] Figure out bug in map color: after un-selection a species some points had wrong color
 - [ ] Would be nice to highlight point on map when hovered on plot
 - [ ] Performance with species like Largemouth Bass
-- [ ] Add disclaimer and link to authoritative reference
 - [ ] Add "about"
   - Link to biotoxin hotline
   - Source data

@@ -44,14 +44,14 @@ const getServingRecommendation = (mercuryPpm: number): string => {
 const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload as PlotData & { isTrendPoint?: boolean };
-    
+
     if (data.isTrendPoint) {
       // Don't show tooltips for trend line points
       return null;
     }
-    
+
     const servingRec = getServingRecommendation(data.mercuryPpm);
-    
+
     return (
       <Paper sx={{ p: 1 }}>
         <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{data.species}</Typography>
@@ -69,7 +69,7 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload
 export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, selectedSpecies }) => {
   const plotDataBySpecies = useMemo(() => {
     const speciesData: Record<string, PlotData[]> = {};
-    
+
     data.forEach(fish => {
       const plotPoint = {
         lengthInches: mmToInches(fish.lengthMm),
@@ -77,30 +77,30 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
         species: fish.species,
         originalData: fish,
       };
-      
+
       if (!speciesData[fish.species]) {
         speciesData[fish.species] = [];
       }
       speciesData[fish.species].push(plotPoint);
     });
-    
+
     return speciesData;
   }, [data]);
 
   const regressionResults = useMemo(() => {
     const results: Record<string, { regression: RegressionResult; trendLine: TrendLinePoint[] }> = {};
-    
+
     Object.entries(plotDataBySpecies).forEach(([species, speciesData]) => {
       if (speciesData.length >= 5) { // Need minimum points for meaningful regression
         const xValues = speciesData.map(d => d.lengthInches);
         const yValues = speciesData.map(d => d.mercuryPpm);
-        
+
         const regression = powerLawRegression(xValues, yValues);
         if (regression && regression.rSquared > 0.1) { // Only show if reasonably good fit
           const minX = Math.min(...xValues);
           const maxX = Math.max(...xValues);
           const trendPoints = generateTrendLinePoints(regression, minX, maxX);
-          
+
           results[species] = {
             regression,
             trendLine: trendPoints,
@@ -108,7 +108,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
         }
       }
     });
-    
+
     return results;
   }, [plotDataBySpecies]);
 
@@ -116,7 +116,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
   // Create separate trend line datasets for each species
   const trendLineData = useMemo(() => {
     const trendData: Record<string, Array<TrendLinePoint & { species: string; isTrendPoint: boolean }>> = {};
-    
+
     Object.entries(regressionResults).forEach(([species, { trendLine }]) => {
       trendData[species] = trendLine.map(point => ({
         lengthInches: point.lengthInches,
@@ -125,22 +125,22 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
         isTrendPoint: true,
       }));
     });
-    
+
     return trendData;
   }, [regressionResults]);
 
 
   const { yAxisDomain, yAxisTicks, mercuryZones } = useMemo(() => {
     const originalPoints = Object.values(plotDataBySpecies).flat();
-    if (originalPoints.length === 0) return { 
-      yAxisDomain: [0, 1], 
+    if (originalPoints.length === 0) return {
+      yAxisDomain: [0, 1],
       yAxisTicks: [0, 0.5, 1],
       mercuryZones: []
     };
-    
+
     const maxMercury = Math.max(...originalPoints.map(d => d.mercuryPpm));
     const maxDomain = Math.ceil(maxMercury * 1.1 * 10) / 10;
-    
+
     // Determine the actual Y-axis max based on the tick logic
     let yAxisMax: number;
     let ticks: number[];
@@ -161,36 +161,36 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
       // For larger values, use automatic ticking
       ticks = [];
     }
-    
+
     // Generate ATL zones that cover the full Y-axis range
     const visibleZones = [];
     let prevThreshold = 0;
-    
+
     for (let i = 0; i < MERCURY_ATLS.length; i++) {
       const atl = MERCURY_ATLS[i];
       let zoneTop;
-      
+
       if (atl.threshold === Infinity || atl.threshold >= yAxisMax) {
         // This is the final zone - extend it to the Y-axis max
         zoneTop = yAxisMax;
       } else {
         zoneTop = atl.threshold;
       }
-      
+
       if (zoneTop > prevThreshold) {
         visibleZones.push({
           ...atl,
           y1: prevThreshold,
           y2: zoneTop,
         });
-        
+
         // If this zone reaches yAxisMax, we're done
         if (zoneTop >= yAxisMax) break;
       }
-      
+
       prevThreshold = atl.threshold;
     }
-    
+
     return { yAxisDomain: [0, yAxisMax], yAxisTicks: ticks, mercuryZones: visibleZones };
   }, [plotDataBySpecies]);
 
@@ -199,12 +199,12 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
       <Typography variant="h6" gutterBottom>
         Mercury vs Fish Length
       </Typography>
-      
+
       <Box sx={{ width: '100%', height: { xs: 350, sm: 400 }, position: 'relative' }}>
         <ResponsiveContainer>
           <ScatterChart margin={{ top: 5, right: 5, bottom: 10, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" />
-            
+
             {/* ATL Background Zones */}
             {mercuryZones.map((zone) => (
               <ReferenceArea
@@ -216,8 +216,8 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
                 stroke={zone.color}
                 strokeOpacity={0.4}
                 strokeWidth={1}
-                label={{ 
-                  value: zone.label, 
+                label={{
+                  value: zone.label,
                   position: 'insideBottomLeft',
                   style: {
                     fill: zone.color,
@@ -228,9 +228,9 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
                 }}
               />
             ))}
-            
-            
-            
+
+
+
             <XAxis
               dataKey="lengthInches"
               type="number"
@@ -247,7 +247,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
               tickFormatter={(value) => value === 0 ? '0' : value.toFixed(2).replace(/\.?0+$/, '')}
             />
             <Tooltip content={<CustomTooltip />} />
-            
+
             {/* Render scatter points for each species */}
             {Object.entries(plotDataBySpecies).map(([species, speciesData]) => (
               <Scatter
@@ -259,7 +259,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
                 name={species}
               />
             ))}
-            
+
             {/* Render trend lines as separate scatter series with line connection */}
             {Object.entries(trendLineData).map(([species, trendPoints]) => (
               <Scatter
@@ -267,10 +267,10 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
                 data={trendPoints}
                 fill="transparent"
                 shape="circle"
-                line={{ 
-                  stroke: getSpeciesColor(species, selectedSpecies), 
-                  strokeWidth: 2, 
-                  strokeDasharray: '5 5' 
+                line={{
+                  stroke: getSpeciesColor(species, selectedSpecies),
+                  strokeWidth: 2,
+                  strokeDasharray: '5 5'
                 }}
                 isAnimationActive={false}
               />
@@ -278,18 +278,18 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
           </ScatterChart>
         </ResponsiveContainer>
       </Box>
-      
+
       {selectedSpecies.length > 0 && (
         <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {selectedSpecies.map(species => {
             const regression = regressionResults[species]?.regression;
             const hasRegression = !!regression;
-            
+
             return (
               <Chip
                 key={species}
                 label={
-                  hasRegression 
+                  hasRegression
                     ? `${species} (R² = ${regression.rSquared.toFixed(2)})`
                     : species
                 }
@@ -306,7 +306,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
           })}
         </Box>
       )}
-      
+
       <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
         Safe consumption rates for adults in servings/week from California OEHHA.
       </Typography>
