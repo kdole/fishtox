@@ -29,6 +29,7 @@ FishTox is a client-side web application that helps California anglers understan
   }
   ```
 - Use type inference where obvious, explicit types where helpful
+- Do not introduce trailing whitespace when writing code
 
 ### React Patterns
 - Functional components only (no class components)
@@ -60,7 +61,7 @@ Before marking any code task as complete, **ALWAYS run these commands in order**
 # 1. Type checking (must pass)
 npm run typecheck
 
-# 2. Linting (must pass)  
+# 2. Linting (must pass)
 npm run lint
 
 # 3. Run all tests (must pass)
@@ -78,7 +79,7 @@ The project has comprehensive test coverage:
 
 ### Test Files
 - `src/utils/csvParser.test.ts` - CSV parsing and validation (8 tests)
-- `src/utils/fishUtils.test.ts` - Species filtering utilities (6 tests)  
+- `src/utils/fishUtils.test.ts` - Species filtering utilities (6 tests)
 - `src/utils/regression.test.ts` - Power-law regression analysis (10 tests)
 - `src/hooks/useUrlState.test.tsx` - URL state synchronization (16 tests)
 - `src/App.test.tsx` - Basic component rendering (1 test)

@@ -21,10 +21,10 @@ describe('fishUtils', () => {
       ];
 
       const result = filterBySpecies(data, ['Bass: Largemouth', 'Catfish: Channel']);
-      
+
       expect(result).toHaveLength(3);
-      expect(result.every(fish => 
-        fish.species === 'Bass: Largemouth' || fish.species === 'Catfish: Channel'
+      expect(result.every(fish =>
+        fish.species === 'Bass: Largemouth' || fish.species === 'Catfish: Channel',
       )).toBe(true);
     });
 

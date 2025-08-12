@@ -14,7 +14,6 @@ interface FishMapProps {
   initialBounds?: LatLngBounds;
 }
 
-
 // Component to track map bounds changes
 const MapBoundsTracker: React.FC<{ onBoundsChange?: (bounds: LatLngBounds) => void }> = ({ onBoundsChange }) => {
   const map = useMapEvents({
@@ -41,13 +40,13 @@ const MapBoundsTracker: React.FC<{ onBoundsChange?: (bounds: LatLngBounds) => vo
 };
 
 // Component to fit map to data bounds only on initial load
-const FitBounds: React.FC<{ 
-  bounds?: [[number, number], [number, number]]; 
+const FitBounds: React.FC<{
+  bounds?: [[number, number], [number, number]];
   initialBounds?: LatLngBounds;
 }> = ({ bounds, initialBounds }) => {
   const map = useMap();
   const hasFitted = useRef(false);
-  
+
   useEffect(() => {
     if (!hasFitted.current) {
       if (initialBounds) {
@@ -58,7 +57,7 @@ const FitBounds: React.FC<{
       hasFitted.current = true;
     }
   }, [map, bounds, initialBounds]);
-  
+
   return null;
 };
 
@@ -74,15 +73,15 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
 
     const lats = data.map(fish => fish.latitude);
     const lngs = data.map(fish => fish.longitude);
-    
+
     const minLat = Math.min(...lats);
     const maxLat = Math.max(...lats);
     const minLng = Math.min(...lngs);
     const maxLng = Math.max(...lngs);
-    
+
     const centerLat = (minLat + maxLat) / 2;
     const centerLng = (minLng + maxLng) / 2;
-    
+
     return {
       center: [centerLat, centerLng] as [number, number],
       bounds: [[minLat, minLng], [maxLat, maxLng]] as [[number, number], [number, number]],
@@ -94,7 +93,7 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
       <Typography variant="h6" gutterBottom>
         Sample Locations
       </Typography>
-      
+
       <Box sx={{ height: 400, width: '100%' }}>
         <MapContainer
           center={center}
@@ -106,7 +105,7 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
-          
+
           {data.map((fish, index) => (
             <CircleMarker
               key={index}
@@ -138,7 +137,7 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
           ))}
         </MapContainer>
       </Box>
-      
+
       {selectedSpecies.length > 0 && (
         <Box sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {selectedSpecies.map(species => (
@@ -157,7 +156,7 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
           ))}
         </Box>
       )}
-      
+
     </Paper>
   );
 };

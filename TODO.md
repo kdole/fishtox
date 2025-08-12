@@ -12,6 +12,7 @@
   - Source data
   - Note about other contaminants
 - [ ] Add map pins for OEHHA advisories: https://oehha.ca.gov/fish/ca-fishmap
+- [ ] Plot bug where color does not go to top - e.g. blue catfish
 
 ## Low Priority
 

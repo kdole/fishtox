@@ -29,7 +29,7 @@ describe('useUrlState', () => {
       // Update the mock return value to reflect the new state
       (useSearchParams as jest.Mock).mockReturnValue([mockSearchParams, mockSetSearchParams]);
     });
-    
+
     (useSearchParams as jest.Mock).mockReturnValue([mockSearchParams, mockSetSearchParams]);
   });
 
@@ -226,7 +226,7 @@ describe('useUrlState', () => {
       // Just verify both functions exist and can be called
       expect(typeof result.current.setSelectedSpecies).toBe('function');
       expect(typeof result.current.setMapBounds).toBe('function');
-      
+
       // Test they can be called without errors
       act(() => {
         result.current.setSelectedSpecies(['Bass: Largemouth']);

@@ -29,15 +29,15 @@ export const SpeciesPicker: React.FC<SpeciesPickerProps> = ({
       filterOptions={(options, state) => {
         if (!state.inputValue) return options;
         const input = state.inputValue.toLowerCase();
-        return options.filter(option => 
-          option.toLowerCase().includes(input)
+        return options.filter(option =>
+          option.toLowerCase().includes(input),
         );
       }}
       openOnFocus
       clearOnBlur={false}
       ChipProps={{
         size: 'small',
-        sx: { fontSize: '0.875rem' }
+        sx: { fontSize: '0.875rem' },
       }}
     />
   );

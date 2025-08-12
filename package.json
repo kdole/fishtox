@@ -35,7 +35,15 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "no-trailing-spaces": "error",
+      "eol-last": "error",
+      "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0 }],
+      "comma-dangle": ["error", "always-multiline"],
+      "semi": ["error", "always"],
+      "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": true }]
+    }
   },
   "browserslist": {
     "production": [

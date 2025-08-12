@@ -12,16 +12,16 @@ function sendToPlausible(metric: Metric): void {
       props: {
         metric_name: metric.name,
         metric_value: Math.round(metric.value),
-        metric_rating: metric.rating || 'unknown'
-      }
+        metric_rating: metric.rating || 'unknown',
+      },
     });
   }
 }
 
 export function initializeWebVitals(): void {
   // Only initialize web vitals in browser environment with proper Performance API
-  if (typeof window === 'undefined' || 
-      !window.performance || 
+  if (typeof window === 'undefined' ||
+      !window.performance ||
       typeof window.performance.getEntriesByType !== 'function' ||
       process.env.NODE_ENV === 'test') {
     return;

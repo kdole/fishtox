@@ -18,7 +18,7 @@ export interface TrendLinePoint {
 export function powerLawRegression(
   xValues: number[],
   yValues: number[],
-  minPoints: number = 3
+  minPoints: number = 3,
 ): RegressionResult | null {
   if (xValues.length !== yValues.length || xValues.length < minPoints) {
     return null;
@@ -86,7 +86,7 @@ export function generateTrendLinePoints(
   regression: RegressionResult,
   minX: number,
   maxX: number,
-  numPoints: number = 50
+  numPoints: number = 50,
 ): TrendLinePoint[] {
   const points: TrendLinePoint[] = [];
   const step = (maxX - minX) / (numPoints - 1);
@@ -94,7 +94,7 @@ export function generateTrendLinePoints(
   for (let i = 0; i < numPoints; i++) {
     const x = minX + i * step;
     const y = regression.predict(x);
-    
+
     // Only include valid predictions
     if (y > 0 && isFinite(y)) {
       points.push({

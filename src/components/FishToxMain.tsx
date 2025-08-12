@@ -41,7 +41,7 @@ export const FishToxMain: React.FC = () => {
       import('leaflet').then((L) => {
         const bounds = new L.LatLngBounds(
           [urlMapBounds.south, urlMapBounds.west],
-          [urlMapBounds.north, urlMapBounds.east]
+          [urlMapBounds.north, urlMapBounds.east],
         );
         setInitialBounds(bounds);
         setMapBounds(bounds);
@@ -56,7 +56,7 @@ export const FishToxMain: React.FC = () => {
     if (!mapBounds) return filteredData;
 
     return filteredData.filter(fish =>
-      mapBounds.contains([fish.latitude, fish.longitude])
+      mapBounds.contains([fish.latitude, fish.longitude]),
     );
   }, [filteredData, mapBounds]);
 

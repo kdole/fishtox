@@ -157,7 +157,7 @@ describe('regression', () => {
 
     it('should handle single point generation', () => {
       const points = generateTrendLinePoints(mockRegression, 5, 5, 1);
-      
+
       // When min and max are the same with 1 point, the step is 0
       // This results in dividing by zero, so no points are generated
       expect(points).toHaveLength(0);
@@ -172,7 +172,7 @@ describe('regression', () => {
       };
 
       const points = generateTrendLinePoints(infiniteRegression, 1, 2);
-      
+
       // Should filter out infinite values
       const finitePoints = points.filter(p => isFinite(p.mercuryPpm));
       expect(finitePoints.length).toBeLessThanOrEqual(points.length);
@@ -180,7 +180,7 @@ describe('regression', () => {
 
     it('should maintain consistent spacing between points', () => {
       const points = generateTrendLinePoints(mockRegression, 0, 10, 11);
-      
+
       for (let i = 1; i < points.length; i++) {
         const spacing = points[i].lengthInches - points[i - 1].lengthInches;
         expect(spacing).toBeCloseTo(1, 10);

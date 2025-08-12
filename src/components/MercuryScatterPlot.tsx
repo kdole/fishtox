@@ -18,7 +18,6 @@ interface PlotData {
   originalData: FishSample;
 }
 
-
 // California OEHHA Advisory Tissue Levels (ATLs) for mercury
 // For general population (Women >45 and men) - converted from ppb to ppm
 const MERCURY_ATLS = [
@@ -112,7 +111,6 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     return results;
   }, [plotDataBySpecies]);
 
-
   // Create separate trend line datasets for each species
   const trendLineData = useMemo(() => {
     const trendData: Record<string, Array<TrendLinePoint & { species: string; isTrendPoint: boolean }>> = {};
@@ -129,13 +127,12 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     return trendData;
   }, [regressionResults]);
 
-
   const { yAxisDomain, yAxisTicks, mercuryZones } = useMemo(() => {
     const originalPoints = Object.values(plotDataBySpecies).flat();
     if (originalPoints.length === 0) return {
       yAxisDomain: [0, 1],
       yAxisTicks: [0, 0.5, 1],
-      mercuryZones: []
+      mercuryZones: [],
     };
 
     const maxMercury = Math.max(...originalPoints.map(d => d.mercuryPpm));
@@ -223,13 +220,11 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
                     fill: zone.color,
                     fontWeight: 'bold',
                     fontSize: '12px',
-                    textShadow: '1px 1px 1px rgba(255,255,255,0.8)'
-                  }
+                    textShadow: '1px 1px 1px rgba(255,255,255,0.8)',
+                  },
                 }}
               />
             ))}
-
-
 
             <XAxis
               dataKey="lengthInches"
@@ -270,7 +265,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
                 line={{
                   stroke: getSpeciesColor(species, selectedSpecies),
                   strokeWidth: 2,
-                  strokeDasharray: '5 5'
+                  strokeDasharray: '5 5',
                 }}
                 isAnimationActive={false}
               />
