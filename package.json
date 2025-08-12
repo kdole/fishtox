@@ -39,10 +39,29 @@
     "rules": {
       "no-trailing-spaces": "error",
       "eol-last": "error",
-      "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0 }],
-      "comma-dangle": ["error", "always-multiline"],
-      "semi": ["error", "always"],
-      "quotes": ["error", "single", { "avoidEscape": true, "allowTemplateLiterals": true }]
+      "no-multiple-empty-lines": [
+        "error",
+        {
+          "max": 1,
+          "maxEOF": 0
+        }
+      ],
+      "comma-dangle": [
+        "error",
+        "always-multiline"
+      ],
+      "semi": [
+        "error",
+        "always"
+      ],
+      "quotes": [
+        "error",
+        "single",
+        {
+          "avoidEscape": true,
+          "allowTemplateLiterals": true
+        }
+      ]
     }
   },
   "browserslist": {
@@ -60,6 +79,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
+    "@types/jest": "^30.0.0",
     "@types/papaparse": "^5.3.0",
     "gh-pages": "^6.3.0",
     "react-scripts": "5.0.1"
