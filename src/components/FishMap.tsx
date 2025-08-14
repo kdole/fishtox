@@ -74,13 +74,22 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
     const lats = data.map(fish => fish.latitude);
     const lngs = data.map(fish => fish.longitude);
 
-    const minLat = Math.min(...lats);
-    const maxLat = Math.max(...lats);
-    const minLng = Math.min(...lngs);
-    const maxLng = Math.max(...lngs);
+    let minLat = Math.min(...lats);
+    let maxLat = Math.max(...lats);
+    let minLng = Math.min(...lngs);
+    let maxLng = Math.max(...lngs);
 
     const centerLat = (minLat + maxLat) / 2;
     const centerLng = (minLng + maxLng) / 2;
+
+    // If all points are at the same location, add a small padding to create valid bounds
+    if (minLat === maxLat && minLng === maxLng) {
+      const padding = 0.01; // About 1km padding
+      minLat -= padding;
+      maxLat += padding;
+      minLng -= padding;
+      maxLng += padding;
+    }
 
     return {
       center: [centerLat, centerLng] as [number, number],
@@ -97,6 +106,7 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
       <Box sx={{ height: 400, width: '100%' }}>
         <MapContainer
           center={center}
+          zoom={13}
           style={{ height: '100%', width: '100%' }}
         >
           <FitBounds bounds={bounds} initialBounds={initialBounds} />
