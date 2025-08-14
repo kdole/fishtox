@@ -3,14 +3,11 @@
 ## High Priority
 
 ### UI/UX Improvements
+- [ ] Error when selecting anchovy?
 - [ ] Improved map diplay (map is tricky: species, mercury, number of points)
 - [ ] Figure out bug in map color: after un-selection a species some points had wrong color
 - [ ] Would be nice to highlight point on map when hovered on plot
 - [ ] Performance with species like Largemouth Bass
-- [ ] Add "about"
-  - Link to biotoxin hotline
-  - Source data
-  - Note about other contaminants
 - [ ] Add map pins for OEHHA advisories: https://oehha.ca.gov/fish/ca-fishmap
 - [ ] Plot bug where color does not go to top - e.g. blue catfish
 

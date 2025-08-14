@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { Container, Typography, Box, CircularProgress, Alert, Grid } from '@mui/material';
+import { Container, Typography, Box, CircularProgress, Alert, Grid, Link } from '@mui/material';
 import { loadFishData } from '../utils/csvParser';
 import { FishSample } from '../types/fish';
 import { SpeciesPicker } from './SpeciesPicker';
 import { MercuryScatterPlot } from './MercuryScatterPlot';
 import { FishMap } from './FishMap';
+import { AboutModal } from './AboutModal';
 import { getUniqueSpecies, filterBySpecies } from '../utils/fishUtils';
 import { useUrlState } from '../hooks/useUrlState';
 import type { LatLngBounds } from 'leaflet';
@@ -15,6 +16,7 @@ export const FishToxMain: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
   const [initialBounds, setInitialBounds] = useState<LatLngBounds | null>(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   const { selectedSpecies, setSelectedSpecies, mapBounds: urlMapBounds, setMapBounds: setUrlMapBounds } = useUrlState();
 
@@ -137,7 +139,15 @@ export const FishToxMain: React.FC = () => {
                   >
                     California OEHHA Fish Advisories
                   </a>{' '}
-                  for official guidance.
+                  for official guidance.{' '}
+                  <Link
+                    component="button"
+                    variant="caption"
+                    onClick={() => setAboutOpen(true)}
+                    sx={{ color: 'text.secondary', textDecoration: 'underline' }}
+                  >
+                    Learn more
+                  </Link>
                 </Typography>
               </>
             ) : (
@@ -148,6 +158,7 @@ export const FishToxMain: React.FC = () => {
           </>
         )}
       </Box>
+      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </Container>
   );
 };
