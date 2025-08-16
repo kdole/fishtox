@@ -200,7 +200,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
       <Box sx={{ width: '100%', height: { xs: 350, sm: 400 }, position: 'relative' }}>
         <ResponsiveContainer>
           <ScatterChart margin={{ top: 5, right: 5, bottom: 10, left: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid stroke="none" />
 
             {/* ATL Background Zones */}
             {mercuryZones.map((zone) => (
