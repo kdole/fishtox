@@ -114,6 +114,22 @@ npm test
 3. **Map-Plot Interaction**: Zooming the map filters the plot data
 4. **Performance**: Keep renders efficient with < 1000 data points
 
+## Map Behavior (Important UX)
+
+### Initial State
+- Map always starts showing all of California using hardcoded bounds
+- Initial bounds defined in `src/utils/constants.ts` as `CALIFORNIA_MAP_BOUNDS`
+
+### User Interaction Tracking
+- Map tracks whether user has manually panned/zoomed via `userHasAdjustedMap` state
+- URL state is ONLY saved when user has manually adjusted the map
+- This prevents URL pollution from automatic map changes
+
+### Species Selection Behavior
+- When adding/removing species, map DOES NOT auto-zoom or refit
+- Map preserves user's current zoom/pan position
+- This allows users to compare different species at the same location
+
 ## Common Pitfalls to Avoid
 
 1. Don't add unnecessary dependencies

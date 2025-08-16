@@ -15,3 +15,11 @@ export const getSpeciesColor = (species: string, allSpecies: string[]): string =
   const index = allSpecies.indexOf(species);
   return SPECIES_COLORS[index % SPECIES_COLORS.length];
 };
+
+// California-focused map bounds
+export const CALIFORNIA_MAP_BOUNDS: [[number, number], [number, number]] = [
+  [32.5, -124.5],  // Southwest corner (Mexican border, Pacific)
+  [42.0, -114.0],  // Northeast corner (Oregon border, Nevada)
+];
+
+export const CALIFORNIA_CENTER: [number, number] = [37.0, -119.5];

@@ -36,9 +36,11 @@ jest.mock('react-leaflet', () => ({
 
 describe('FishMap', () => {
   const mockOnBoundsChange = jest.fn();
+  const mockOnUserAdjustedMap = jest.fn();
 
   beforeEach(() => {
     mockOnBoundsChange.mockClear();
+    mockOnUserAdjustedMap.mockClear();
   });
 
   it('renders without crashing', () => {
@@ -47,6 +49,8 @@ describe('FishMap', () => {
         data={[]}
         selectedSpecies={[]}
         onBoundsChange={mockOnBoundsChange}
+        userHasAdjustedMap={false}
+        onUserAdjustedMap={mockOnUserAdjustedMap}
       />,
     );
     expect(screen.getByText('Sample Locations')).toBeInTheDocument();
@@ -58,11 +62,13 @@ describe('FishMap', () => {
         data={[]}
         selectedSpecies={[]}
         onBoundsChange={mockOnBoundsChange}
+        userHasAdjustedMap={false}
+        onUserAdjustedMap={mockOnUserAdjustedMap}
       />,
     );
     const mapContainer = screen.getByTestId('map-container');
     const center = JSON.parse(mapContainer.getAttribute('data-center') || '[]');
-    expect(center).toEqual([36.7783, -119.4179]);
+    expect(center).toEqual([37.0, -119.5]);
   });
 
   it('handles data with different coordinates', () => {
@@ -88,13 +94,15 @@ describe('FishMap', () => {
         data={testData}
         selectedSpecies={['Bass']}
         onBoundsChange={mockOnBoundsChange}
+        userHasAdjustedMap={false}
+        onUserAdjustedMap={mockOnUserAdjustedMap}
       />,
     );
 
     const mapContainer = screen.getByTestId('map-container');
     const center = JSON.parse(mapContainer.getAttribute('data-center') || '[]');
-    expect(center[0]).toBeCloseTo(37.55, 2);
-    expect(center[1]).toBeCloseTo(-122.15, 2);
+    // With hardcoded bounds, center is always California center
+    expect(center).toEqual([37.0, -119.5]);
     expect(screen.getAllByTestId('circle-marker')).toHaveLength(2);
   });
 
@@ -128,17 +136,18 @@ describe('FishMap', () => {
         data={identicalLocationData}
         selectedSpecies={['Anchovy']}
         onBoundsChange={mockOnBoundsChange}
+        userHasAdjustedMap={false}
+        onUserAdjustedMap={mockOnUserAdjustedMap}
       />,
     );
 
     // Should render without errors
     expect(screen.getByText('Sample Locations')).toBeInTheDocument();
 
-    // Map should be centered at the single location
+    // With hardcoded bounds, center is always California center
     const mapContainer = screen.getByTestId('map-container');
     const center = JSON.parse(mapContainer.getAttribute('data-center') || '[]');
-    expect(center[0]).toBeCloseTo(37.4996, 4);
-    expect(center[1]).toBeCloseTo(-122.125, 4);
+    expect(center).toEqual([37.0, -119.5]);
 
     // Should have a default zoom level
     expect(mapContainer.getAttribute('data-zoom')).toBe('13');
@@ -163,6 +172,8 @@ describe('FishMap', () => {
         data={testData}
         selectedSpecies={['Bass', 'Trout']}
         onBoundsChange={mockOnBoundsChange}
+        userHasAdjustedMap={false}
+        onUserAdjustedMap={mockOnUserAdjustedMap}
       />,
     );
 

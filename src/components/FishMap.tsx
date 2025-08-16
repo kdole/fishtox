@@ -1,40 +1,48 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import { Paper, Typography, Box, Chip } from '@mui/material';
 import { FishSample } from '../types/fish';
 import { mmToInches } from '../utils/csvParser';
-import { getSpeciesColor } from '../utils/constants';
+import { getSpeciesColor, CALIFORNIA_MAP_BOUNDS, CALIFORNIA_CENTER } from '../utils/constants';
 import type { LatLngBounds } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 interface FishMapProps {
   data: FishSample[];
   selectedSpecies: string[];
-  onBoundsChange?: (bounds: LatLngBounds) => void;
+  onBoundsChange?: (bounds: LatLngBounds | null) => void;
   initialBounds?: LatLngBounds;
+  userHasAdjustedMap: boolean;
+  onUserAdjustedMap: () => void;
 }
 
 // Component to track map bounds changes
-const MapBoundsTracker: React.FC<{ onBoundsChange?: (bounds: LatLngBounds) => void }> = ({ onBoundsChange }) => {
+const MapBoundsTracker: React.FC<{
+  onBoundsChange?: (bounds: LatLngBounds | null) => void;
+  onUserAdjustedMap: () => void;
+  userHasAdjustedMap: boolean;
+}> = ({ onBoundsChange, onUserAdjustedMap, userHasAdjustedMap }) => {
   const map = useMapEvents({
     moveend: () => {
-      if (onBoundsChange) {
+      onUserAdjustedMap();
+      if (onBoundsChange && userHasAdjustedMap) {
         onBoundsChange(map.getBounds());
       }
     },
     zoomend: () => {
-      if (onBoundsChange) {
+      onUserAdjustedMap();
+      if (onBoundsChange && userHasAdjustedMap) {
         onBoundsChange(map.getBounds());
       }
     },
   });
 
   useEffect(() => {
-    // Report initial bounds
+    // Report initial bounds for filtering, but don't save to URL
     if (onBoundsChange) {
-      onBoundsChange(map.getBounds());
+      onBoundsChange(userHasAdjustedMap ? map.getBounds() : null);
     }
-  }, [map, onBoundsChange]);
+  }, [map, onBoundsChange, userHasAdjustedMap]);
 
   return null;
 };
@@ -50,8 +58,10 @@ const FitBounds: React.FC<{
   useEffect(() => {
     if (!hasFitted.current) {
       if (initialBounds) {
+        // User had previously adjusted the map
         map.fitBounds(initialBounds);
       } else if (bounds) {
+        // Show full California extent on initial load
         map.fitBounds(bounds);
       }
       hasFitted.current = true;
@@ -61,41 +71,10 @@ const FitBounds: React.FC<{
   return null;
 };
 
-export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBoundsChange, initialBounds }) => {
-  const { center, bounds } = useMemo(() => {
-    if (data.length === 0) {
-      // Default to California center
-      return {
-        center: [36.7783, -119.4179] as [number, number],
-        bounds: undefined,
-      };
-    }
-
-    const lats = data.map(fish => fish.latitude);
-    const lngs = data.map(fish => fish.longitude);
-
-    let minLat = Math.min(...lats);
-    let maxLat = Math.max(...lats);
-    let minLng = Math.min(...lngs);
-    let maxLng = Math.max(...lngs);
-
-    const centerLat = (minLat + maxLat) / 2;
-    const centerLng = (minLng + maxLng) / 2;
-
-    // If all points are at the same location, add a small padding to create valid bounds
-    if (minLat === maxLat && minLng === maxLng) {
-      const padding = 0.01; // About 1km padding
-      minLat -= padding;
-      maxLat += padding;
-      minLng -= padding;
-      maxLng += padding;
-    }
-
-    return {
-      center: [centerLat, centerLng] as [number, number],
-      bounds: [[minLat, minLng], [maxLat, maxLng]] as [[number, number], [number, number]],
-    };
-  }, [data]);
+export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBoundsChange, initialBounds, userHasAdjustedMap, onUserAdjustedMap }) => {
+  // Use hardcoded California bounds for consistent initial view
+  const center = CALIFORNIA_CENTER;
+  const bounds = CALIFORNIA_MAP_BOUNDS;
 
   return (
     <Paper sx={{ p: { xs: 1, sm: 2 } }}>
@@ -106,11 +85,15 @@ export const FishMap: React.FC<FishMapProps> = ({ data, selectedSpecies, onBound
       <Box sx={{ height: 400, width: '100%' }}>
         <MapContainer
           center={center}
-          zoom={13}
+          zoom={6}
           style={{ height: '100%', width: '100%' }}
         >
           <FitBounds bounds={bounds} initialBounds={initialBounds} />
-          <MapBoundsTracker onBoundsChange={onBoundsChange} />
+          <MapBoundsTracker
+            onBoundsChange={onBoundsChange}
+            onUserAdjustedMap={onUserAdjustedMap}
+            userHasAdjustedMap={userHasAdjustedMap}
+          />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

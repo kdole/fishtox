@@ -17,13 +17,23 @@ export const FishToxMain: React.FC = () => {
   const [mapBounds, setMapBounds] = useState<LatLngBounds | null>(null);
   const [initialBounds, setInitialBounds] = useState<LatLngBounds | null>(null);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [userHasAdjustedMap, setUserHasAdjustedMap] = useState(false);
 
   const { selectedSpecies, setSelectedSpecies, mapBounds: urlMapBounds, setMapBounds: setUrlMapBounds } = useUrlState();
 
-  const handleMapBoundsChange = useCallback((bounds: LatLngBounds) => {
+  const handleMapBoundsChange = useCallback((bounds: LatLngBounds | null) => {
     setMapBounds(bounds);
-    setUrlMapBounds(bounds);
-  }, [setUrlMapBounds]);
+    // Only save to URL if user has manually adjusted the map
+    if (bounds && userHasAdjustedMap) {
+      setUrlMapBounds(bounds);
+    }
+  }, [setUrlMapBounds, userHasAdjustedMap]);
+
+  const handleUserAdjustedMap = useCallback(() => {
+    if (!userHasAdjustedMap) {
+      setUserHasAdjustedMap(true);
+    }
+  }, [userHasAdjustedMap]);
 
   useEffect(() => {
     loadFishData()
@@ -47,6 +57,7 @@ export const FishToxMain: React.FC = () => {
         );
         setInitialBounds(bounds);
         setMapBounds(bounds);
+        setUserHasAdjustedMap(true); // URL bounds mean user had adjusted map
       });
     }
   }, [urlMapBounds, initialBounds]);
@@ -55,12 +66,12 @@ export const FishToxMain: React.FC = () => {
   const filteredData = useMemo(() => filterBySpecies(fishData, selectedSpecies), [fishData, selectedSpecies]);
 
   const mapFilteredData = useMemo(() => {
-    if (!mapBounds) return filteredData;
+    if (!mapBounds || !userHasAdjustedMap) return filteredData;
 
     return filteredData.filter(fish =>
       mapBounds.contains([fish.latitude, fish.longitude]),
     );
-  }, [filteredData, mapBounds]);
+  }, [filteredData, mapBounds, userHasAdjustedMap]);
 
   return (
     <Container maxWidth="lg">
@@ -101,7 +112,7 @@ export const FishToxMain: React.FC = () => {
             {selectedSpecies.length > 0 ? (
               <>
                 <Typography variant="body1" gutterBottom>
-                  {mapBounds && mapFilteredData.length !== filteredData.length ? (
+                  {userHasAdjustedMap && mapBounds && mapFilteredData.length !== filteredData.length ? (
                     <>Showing {mapFilteredData.length} {selectedSpecies.join(', ')} samples (filtered by map bounds)</>
                   ) : (
                     <>Showing {filteredData.length} {selectedSpecies.join(', ')} samples</>
@@ -115,7 +126,7 @@ export const FishToxMain: React.FC = () => {
                 <Grid container spacing={3} sx={{ my: 1 }}>
                   <Grid item xs={12} lg={6}>
                     <MercuryScatterPlot
-                      data={mapBounds ? mapFilteredData : filteredData}
+                      data={userHasAdjustedMap && mapBounds ? mapFilteredData : filteredData}
                       selectedSpecies={selectedSpecies}
                     />
                   </Grid>
@@ -125,6 +136,8 @@ export const FishToxMain: React.FC = () => {
                       selectedSpecies={selectedSpecies}
                       onBoundsChange={handleMapBoundsChange}
                       initialBounds={initialBounds || undefined}
+                      userHasAdjustedMap={userHasAdjustedMap}
+                      onUserAdjustedMap={handleUserAdjustedMap}
                     />
                   </Grid>
                 </Grid>
