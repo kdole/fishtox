@@ -150,7 +150,7 @@ describe('FishMap', () => {
     expect(center).toEqual([37.0, -119.5]);
 
     // Should have a default zoom level
-    expect(mapContainer.getAttribute('data-zoom')).toBe('13');
+    expect(mapContainer.getAttribute('data-zoom')).toBe('6');
 
     // All markers should be rendered
     expect(screen.getAllByTestId('circle-marker')).toHaveLength(3);

@@ -35,6 +35,14 @@ export const FishToxMain: React.FC = () => {
     }
   }, [userHasAdjustedMap]);
 
+  const handleResetZoom = useCallback(() => {
+    // Clear bounds from URL
+    setUrlMapBounds(null);
+    // Reset map state
+    setMapBounds(null);
+    setUserHasAdjustedMap(false);
+  }, [setUrlMapBounds]);
+
   useEffect(() => {
     loadFishData()
       .then(data => {
@@ -138,6 +146,7 @@ export const FishToxMain: React.FC = () => {
                       initialBounds={initialBounds || undefined}
                       userHasAdjustedMap={userHasAdjustedMap}
                       onUserAdjustedMap={handleUserAdjustedMap}
+                      onResetZoom={handleResetZoom}
                     />
                   </Grid>
                 </Grid>
