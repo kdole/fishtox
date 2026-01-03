@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps, ReferenceArea } from 'recharts';
-import { Paper, Typography, Box, Chip } from '@mui/material';
+import { Paper, Typography, Box, Chip, ToggleButtonGroup, ToggleButton } from '@mui/material';
 import { FishSample } from '../types/fish';
 import { mmToInches } from '../utils/csvParser';
 import { powerLawRegression, generateTrendLinePoints, RegressionResult, TrendLinePoint } from '../utils/regression';
@@ -20,7 +20,7 @@ interface PlotData {
 
 // California OEHHA Advisory Tissue Levels (ATLs) for mercury
 // For general population (Women >45 and men) - converted from ppb to ppm
-const MERCURY_ATLS = [
+const MERCURY_ATLS_GENERAL = [
   { servings: 7, threshold: 0.094, color: '#388e3c', label: '7/wk' }, // Slightly bluish green
   { servings: 6, threshold: 0.109, color: '#43a047', label: '6/wk' }, // Green with slight blue tint
   { servings: 5, threshold: 0.130, color: '#4caf50', label: '5/wk' }, // Green
@@ -31,8 +31,21 @@ const MERCURY_ATLS = [
   { servings: 0, threshold: Infinity, color: '#f44336', label: '0/wk' }, // Red
 ];
 
-const getServingRecommendation = (mercuryPpm: number): string => {
-  for (const atl of MERCURY_ATLS) {
+// California OEHHA Advisory Tissue Levels (ATLs) for mercury
+// For sensitive population (Kids and women who could become pregnant) - converted from ppb to ppm
+const MERCURY_ATLS_SENSITIVE = [
+  { servings: 7, threshold: 0.031, color: '#388e3c', label: '7/wk' }, // Slightly bluish green (≤31 ppb)
+  { servings: 6, threshold: 0.036, color: '#43a047', label: '6/wk' }, // Green with slight blue tint (≤36 ppb)
+  { servings: 5, threshold: 0.044, color: '#4caf50', label: '5/wk' }, // Green (≤44 ppb)
+  { servings: 4, threshold: 0.055, color: '#66bb6a', label: '4/wk' }, // Light green (≤55 ppb)
+  { servings: 3, threshold: 0.070, color: '#9ccc65', label: '3/wk' }, // Yellow-green (≤70 ppb)
+  { servings: 2, threshold: 0.150, color: '#ffc107', label: '2/wk' }, // Yellow (≤150 ppb)
+  { servings: 1, threshold: 0.440, color: '#ff9800', label: '1/wk' }, // Orange (≤440 ppb)
+  { servings: 0, threshold: Infinity, color: '#f44336', label: '0/wk' }, // Red (>440 ppb)
+];
+
+const getServingRecommendation = (mercuryPpm: number, atls: typeof MERCURY_ATLS_GENERAL): string => {
+  for (const atl of atls) {
     if (mercuryPpm <= atl.threshold) {
       return atl.servings === 0 ? 'Avoid consumption' : `${atl.servings} servings/week max`;
     }
@@ -40,7 +53,11 @@ const getServingRecommendation = (mercuryPpm: number): string => {
   return 'Avoid consumption';
 };
 
-const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload }) => {
+interface CustomTooltipProps extends TooltipProps<number, string> {
+  atls: typeof MERCURY_ATLS_GENERAL;
+}
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({ active, payload, atls }) => {
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload as PlotData & { isTrendPoint?: boolean };
 
@@ -49,7 +66,7 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload
       return null;
     }
 
-    const servingRec = getServingRecommendation(data.mercuryPpm);
+    const servingRec = getServingRecommendation(data.mercuryPpm, atls);
 
     return (
       <Paper sx={{ p: 1 }}>
@@ -65,7 +82,22 @@ const CustomTooltip: React.FC<TooltipProps<number, string>> = ({ active, payload
   return null;
 };
 
+type PopulationType = 'general' | 'sensitive';
+
 export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, selectedSpecies }) => {
+  const [populationType, setPopulationType] = useState<PopulationType>('general');
+
+  const currentAtls = populationType === 'general' ? MERCURY_ATLS_GENERAL : MERCURY_ATLS_SENSITIVE;
+
+  const handlePopulationChange = (
+    _event: React.MouseEvent<HTMLElement>,
+    newValue: PopulationType | null,
+  ) => {
+    if (newValue !== null) {
+      setPopulationType(newValue);
+    }
+  };
+
   const plotDataBySpecies = useMemo(() => {
     const speciesData: Record<string, PlotData[]> = {};
 
@@ -163,8 +195,8 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     const visibleZones = [];
     let prevThreshold = 0;
 
-    for (let i = 0; i < MERCURY_ATLS.length; i++) {
-      const atl = MERCURY_ATLS[i];
+    for (let i = 0; i < currentAtls.length; i++) {
+      const atl = currentAtls[i];
       let zoneTop;
 
       if (atl.threshold === Infinity || atl.threshold >= yAxisMax) {
@@ -189,13 +221,29 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
     }
 
     return { yAxisDomain: [0, yAxisMax], yAxisTicks: ticks, mercuryZones: visibleZones };
-  }, [plotDataBySpecies]);
+  }, [plotDataBySpecies, currentAtls]);
 
   return (
     <Paper sx={{ p: { xs: 1, sm: 2 } }}>
-      <Typography variant="h6" gutterBottom>
-        Mercury vs Fish Length
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
+        <Typography variant="h6">
+          Mercury vs Fish Length
+        </Typography>
+        <ToggleButtonGroup
+          value={populationType}
+          exclusive
+          onChange={handlePopulationChange}
+          aria-label="population type"
+          size="small"
+        >
+          <ToggleButton value="general" aria-label="general population">
+            Adults
+          </ToggleButton>
+          <ToggleButton value="sensitive" aria-label="sensitive population">
+            Kids & Women
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
 
       <Box sx={{ width: '100%', height: { xs: 350, sm: 400 }, position: 'relative' }}>
         <ResponsiveContainer>
@@ -241,7 +289,7 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
               ticks={yAxisTicks.length > 0 ? yAxisTicks : undefined}
               tickFormatter={(value) => value === 0 ? '0' : value.toFixed(2).replace(/\.?0+$/, '')}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<CustomTooltip atls={currentAtls} />} />
 
             {/* Render scatter points for each species */}
             {Object.entries(plotDataBySpecies).map(([species, speciesData]) => (
@@ -303,7 +351,10 @@ export const MercuryScatterPlot: React.FC<MercuryScatterPlotProps> = ({ data, se
       )}
 
       <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-        Safe consumption rates for adults in servings/week from California OEHHA.
+        Safe consumption rates in servings/week from California OEHHA for{' '}
+        {populationType === 'general'
+          ? 'women over 45 and men'
+          : 'minors and women under 45'}.
       </Typography>
     </Paper>
   );
