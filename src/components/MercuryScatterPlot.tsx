@@ -21,14 +21,14 @@ interface PlotData {
 // California OEHHA Advisory Tissue Levels (ATLs) for mercury
 // For general population (Women >45 and men) - converted from ppb to ppm
 const MERCURY_ATLS = [
-  { servings: 7, threshold: 0.094, color: '#1b5e20', label: '7/wk' }, // Dark green
-  { servings: 6, threshold: 0.109, color: '#2e7d32', label: '6/wk' }, // Green
-  { servings: 5, threshold: 0.130, color: '#388e3c', label: '5/wk' }, // Medium green
-  { servings: 4, threshold: 0.160, color: '#ffc107', label: '4/wk' }, // Yellow
-  { servings: 3, threshold: 0.220, color: '#ff9800', label: '3/wk' }, // Orange
-  { servings: 2, threshold: 0.440, color: '#f57c00', label: '2/wk' }, // Dark orange
-  { servings: 1, threshold: 1.310, color: '#d32f2f', label: '1/wk' }, // Red
-  { servings: 0, threshold: Infinity, color: '#b71c1c', label: '0/wk' }, // Dark red
+  { servings: 7, threshold: 0.094, color: '#388e3c', label: '7/wk' }, // Slightly bluish green
+  { servings: 6, threshold: 0.109, color: '#43a047', label: '6/wk' }, // Green with slight blue tint
+  { servings: 5, threshold: 0.130, color: '#4caf50', label: '5/wk' }, // Green
+  { servings: 4, threshold: 0.160, color: '#66bb6a', label: '4/wk' }, // Light green
+  { servings: 3, threshold: 0.220, color: '#9ccc65', label: '3/wk' }, // Yellow-green
+  { servings: 2, threshold: 0.440, color: '#ffc107', label: '2/wk' }, // Yellow
+  { servings: 1, threshold: 1.310, color: '#ff9800', label: '1/wk' }, // Orange
+  { servings: 0, threshold: Infinity, color: '#f44336', label: '0/wk' }, // Red
 ];
 
 const getServingRecommendation = (mercuryPpm: number): string => {
